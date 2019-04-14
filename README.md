@@ -1,14 +1,21 @@
-# Extract
+# Video_Converter
 Place this app in **nextcloud/apps/**
 
 ## Features
 
-* Zip extraction
-* Rar extraction (partial)
+* Video Conversion
+* Override or not
+* More incoming...
+
+## Output supported
+
+* MP4
+* AVI
+* More incoming...
 
 ## Requirements
 
-* Rar PHP extension or unrar 
+* FFmpeg
 
 ## Usage
 

@@ -15,11 +15,17 @@ $(document).ready(function () {
 			OCA.Files.fileActions.registerAction({
 				name: 'convert',
 				displayName: 'Convert into',
-				mime: 'video',
+				mime: 'all',
 				permissions: OC.PERMISSION_READ,
 				type: OCA.Files.FileActions.TYPE_DROPDOWN,
-				iconClass: 'icon-extract',
+				iconClass: 'icon-convert',
 				actionHandler: function (filename, context) {
+
+                    var a = context.$file[0].children[1].children[0].children[0].innerHTML;
+                    var b = 'background-repeat:no-repeat;margin-right:1px;display: block;width: 40px;height: 32px;white-space: nowrap;border-image-repeat: stretch;border-image-slice: initial;background-size: 32px;';
+                    var position = 30;
+                    var output = [a.slice(0, position), b, a.slice(position)].join('');
+
                     var self = this;
                     var override = false;
                     var title = "Titre";
@@ -32,7 +38,10 @@ $(document).ready(function () {
                     $('#linkeditor').append(
                     '<div class="urledit push-bottom">'
                     +'<a class="oc-dialog-close" id="btnClose"></a>'
-                        +'<h2 class="oc-dialog-title">' + filename + '</h2>'
+                        +'<h2 class="oc-dialog-title" style="display:flex;margin-right:30px;">' 
+                        +output
+                        + filename 
+                        + '</h2>'
                         +'<p class="urldisplay" id="text">'
                             +t('video_converter', 'Choose the output format')
                             +' <em></em>'
@@ -68,7 +77,6 @@ $(document).ready(function () {
                             directory: '/'+context.dir.split('/').slice(2).join('/'),
                             external : 1,
                             type: $element.target.id,
-                            override : override
                         };
                     }else{
                         var data = {
@@ -76,7 +84,6 @@ $(document).ready(function () {
                             directory: context.dir,
                             external : 0,
                             type: $element.target.id,
-                            override : override
                         };
                     }
                     console.log("test");
@@ -92,6 +99,10 @@ $(document).ready(function () {
 
                         },
                         success: function() {
+                            this.filesClient = OC.Files.getClient();
+                            if (override){
+                                this.filesClient.remove(context.dir+"/"+filename);
+                            }
                             context.fileList.reload();
                             close();
                         }
@@ -105,7 +116,6 @@ $(document).ready(function () {
                             directory: '/'+context.dir.split('/').slice(2).join('/'),
                             external : 1,
                             type: $element.target.id,
-                            override : override
                         };
                     }else{
                         var data = {
@@ -113,7 +123,6 @@ $(document).ready(function () {
                             directory: context.dir,
                             external : 0,
                             type: $element.target.id,
-                            override : override
                         };
                     }
                     $.ajax({
@@ -128,8 +137,12 @@ $(document).ready(function () {
 
                         },
                         success: function() {
+                            this.filesClient = OC.Files.getClient();
+                            if (override){
+                                this.filesClient.remove(context.dir+"/"+filename);
+                            }
                             context.fileList.reload();
-                           close();
+                            close();
                         }
                     });
                 });

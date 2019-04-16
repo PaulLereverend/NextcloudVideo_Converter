@@ -1,21 +1,10 @@
 $(document).ready(function () {
 	var actionsExtract = {
 		init: function () {
-            /*var App = OCA.Files_External.App;
-            console.log(OC.MountConfig);
-
-            OCA.Files_External.StatusManager.getMountPointList(function() {
-                 //console.log(this);
-            });
-    var fileList;*/
-    
-
-    //fileList = App.initList($('#app-content-extstoragemounts'));
-
 			OCA.Files.fileActions.registerAction({
 				name: 'convert',
 				displayName: 'Convert into',
-				mime: 'all',
+				mime: 'video',
 				permissions: OC.PERMISSION_READ,
 				type: OCA.Files.FileActions.TYPE_DROPDOWN,
 				iconClass: 'icon-convert',

@@ -3,28 +3,23 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>video_converter</id>
     <name>Video converter</name>
-    <summary>Extract archive from the web interface</summary>
+    <summary>Convert videos within the web interface</summary>
     <screenshot>https://raw.githubusercontent.com/PaulLereverend/NextcloudExtract/master/img/extract.png</screenshot>
-    <description><![CDATA[Extract zip and rar files.
+    <description><![CDATA[Convert videos within the web interface
 
-        *  **Features :** Zip and rar extraction.
+*  **Features :** MP4 and AVI output
 
-        *  **Requirements :** Rar PHP extension or unrar (pecl -v install rar)
+*  **Requirements :** 
+    * FFmpeg
+    * FFprobe
 
-        *  **Note :** If you want to use this app on external local storage add the mount points on your config.php file like this (no / at the end)
-
-            `'external' => 
-            array (
-                0 => '/home/localfoler',
-                1 => '/share/anotherfolder',
-            ),`
-            ]]>
-    </description>
-    <version>0.0.1</version>
+*  **Note :** More format will be added soon
+]]></description>
+    <version>0.0.2</version>
     <licence>agpl</licence>
     <author mail="paulereverend@gmail.com">Paul Lereverend</author>
     <namespace>Video_converter</namespace>
-    <category>files</category>
+    <category>multimedia</category>
     <category>tools</category>
     <website>https://github.com/PaulLereverend/NextcloudExtract/</website>
     <bugs>https://github.com/PaulLereverend/NextcloudExtract</bugs>

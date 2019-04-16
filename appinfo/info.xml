@@ -4,7 +4,7 @@
     <id>video_converter</id>
     <name>Video converter</name>
     <summary>Convert videos within the web interface</summary>
-    <screenshot>https://raw.githubusercontent.com/PaulLereverend/NextcloudExtract/master/img/extract.png</screenshot>
+    <screenshot>https://github.com/PaulLereverend/NextcloudVideo_Converter/blob/master/img/appstore.gif</screenshot>
     <description><![CDATA[Convert videos within the web interface
 
 *  **Features :** MP4 and AVI output

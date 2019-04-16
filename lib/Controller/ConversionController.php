@@ -1,15 +1,11 @@
 <?php
 namespace OCA\Video_Converter\Controller;
-
-//require __DIR__ .'/vendor/autoload.php';
-//require_once __DIR__ . '/composer/autoload_real.php';
 include __DIR__.'/../vendor/autoload.php';
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
-//use \OC\Files\Cache\Scanner;
 use \OCP\IConfig;
 use FFMpeg;
 use FFMpeg\Media;
@@ -25,34 +21,33 @@ class ConversionController extends Controller {
 		$this->UserId = $UserId;
 	}
 
-	/**
-	 * CAUTION: the @Stuff turns off security checks; for this page no admin is
-	 *          required and no CSRF check. If you don't know what CSRF is, read
-	 *          it up in the docs or you might create a security hole. This is
-	 *          basically the only required method to add this exemption, don't
-	 *          add it to any other method if you don't exactly know what it does
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-
+	public function getExternalMP(){
+		$mounts = \OC_Mount_Config::getAbsoluteMountPoints($this->UserId);
+		$externalMountPoints = array();
+		foreach($mounts as $mount){
+			if ($mount["backend"] == "Local"){
+				$externalMountPoints[] = $mount["options"]["datadir"];
+			}
+		}
+		return $externalMountPoints;
+	}
     public function convertHere($nameOfFile, $directory, $external, $type) {
 		$ffmpeg = FFMpeg\FFMpeg::create();
 		$format = new FFMpeg\Format\Video\X264();
 		if ($external){
-			$good = false;
-			$externalUrl = $this->config->getSystemValue('external', '');
-			for ($i=0; $i < sizeof($externalUrl) && !$good && $externalUrl[$i]!= null; $i++){
-				echo $externalUrl[$i].$directory.'/'.$nameOfFile;
-				$video = $ffmpeg->open($externalUrl[$i].$directory.'/'.$nameOfFile);
+			$externalUrl = $this->getExternalMP();
+			foreach ($externalUrl as $url) {
+				$video = $ffmpeg->open($url.$directory.'/'.$nameOfFile);
 				try {
-					$test = $video->save($format, $externalUrl[$i].$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);
-					echo $test;
+					 $video->save($format, $url.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);
+					 echo "ok";
+					 return;
 				} catch (ExecutionFailureException $th) {
 					echo $th;
 				}
-				$good = true;
+
 			}
+			echo "ko";
 		}else{
 				$video = $ffmpeg->open($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile);
 				try {

@@ -29,17 +29,32 @@ $(document).ready(function () {
                     +'<a class="oc-dialog-close" id="btnClose"></a>'
                         +'<h2 class="oc-dialog-title" style="display:flex;margin-right:30px;">' 
                         +output
-                        + filename 
+                        +filename 
                         + '</h2>'
+                        +'<div class="sk-circle" style="display:none" id="loading"><div class="sk-circle1 sk-child"></div><div class="sk-circle2 sk-child"></div><div class="sk-circle3 sk-child"></div><div class="sk-circle4 sk-child"></div><div class="sk-circle5 sk-child"></div><div class="sk-circle6 sk-child"></div><div class="sk-circle7 sk-child"></div><div class="sk-circle8 sk-child"></div><div class="sk-circle9 sk-child"></div><div class="sk-circle10 sk-child"></div><div class="sk-circle11 sk-child"></div><div class="sk-circle12 sk-child"></div></div>'
+                        + '<div id="checkOverride">'
+                        +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
+                        +'Preset'
+                        +'</p>'
+                        + '<select id="preset">'
+                        +'<option value="ultrafast">UltraFast</option>'
+                        +'<option value="superfast">SuperFast</option>'
+                        +'<option value="veryfast">VeryFast</option>'
+                        +'<option value="faster">Faster</option>'
+                        +'<option value="fast">Fast</option>'
+                        +'<option value="medium">Medium</option>'
+                        +'<option value="slow">Slow</option>'
+                        +'<option value="veryslow">VerySlow</option>'
+                        +'</select>'
+                        +'<br>'
+                        +'<p id="note" style="margin-bottom:20px;">note: faster means bigger output file size</p>'
+                        +'<input type="checkbox" id="override" name="override">'
+                        +'<label for="override">override</label>'
+                        +'</div>'
                         +'<p class="urldisplay" id="text">'
                             +t('video_converter', 'Choose the output format')
                             +' <em></em>'
                         +'</p>'
-                        +'<div class="sk-circle" style="display:none" id="loading"><div class="sk-circle1 sk-child"></div><div class="sk-circle2 sk-child"></div><div class="sk-circle3 sk-child"></div><div class="sk-circle4 sk-child"></div><div class="sk-circle5 sk-child"></div><div class="sk-circle6 sk-child"></div><div class="sk-circle7 sk-child"></div><div class="sk-circle8 sk-child"></div><div class="sk-circle9 sk-child"></div><div class="sk-circle10 sk-child"></div><div class="sk-circle11 sk-child"></div><div class="sk-circle12 sk-child"></div></div>'
-                        + '<div id="checkOverride">'
-                        +'<input type="checkbox" id="override" name="override">'
-                        +'<label for="override">override ?</label>'
-                        +'</div>'
                     +'</div>'
                     +'<div class="oc-dialog-buttonrow boutons">'
                         +'<a class="button primary" id="mp4">' + t('video_converter', '.MP4') + '</a>'
@@ -53,6 +68,9 @@ $(document).ready(function () {
                 });  
                 document.getElementById("override").addEventListener("click", function (){
                     override = !override;
+                }); 
+                document.getElementById("preset").addEventListener("change", function (element){
+                    console.log(element.srcElement.value);
                 }); 
                 document.getElementById("linkeditor_overlay").addEventListener("click", function(){
                     close();
@@ -85,6 +103,9 @@ $(document).ready(function () {
                             document.getElementById("loading").style.display= "block";
                             document.getElementById("checkOverride").style.display= "none";
                             document.getElementById("text").style.display= "none";
+                            document.getElementById("preset").style.display= "block";
+                            document.getElementById("labelPreset").style.display= "block";
+                            document.getElementById("note").style.display= "block";
 
                         },
                         success: function() {

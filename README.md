@@ -5,6 +5,7 @@ Place this app in **nextcloud/apps/**
 
 * Video Conversion
 * Override or not
+* Preset option
 * More incoming...
 
 ## Output supported

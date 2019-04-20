@@ -12,6 +12,8 @@ Place this app in **nextcloud/apps/**
 
 * MP4
 * AVI
+* WEBM
+* M4V
 * More incoming...
 
 ## Requirements
@@ -19,3 +21,7 @@ Place this app in **nextcloud/apps/**
 * FFmpeg
 * FFprobe
 
+## TODO
+
+* Choose codec
+* Support encrypted files

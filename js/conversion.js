@@ -17,6 +17,7 @@ $(document).ready(function () {
 
                     var self = this;
                     var override = false;
+                    var preset = "medium";
                     var title = "Titre";
                     $('body').append(
                         '<div id="linkeditor_overlay" class="oc-dialog-dim"></div>'
@@ -42,12 +43,12 @@ $(document).ready(function () {
                         +'<option value="veryfast">VeryFast</option>'
                         +'<option value="faster">Faster</option>'
                         +'<option value="fast">Fast</option>'
-                        +'<option value="medium">Medium</option>'
+                        +'<option value="medium" selected>Medium (default)</option>'
                         +'<option value="slow">Slow</option>'
                         +'<option value="veryslow">VerySlow</option>'
                         +'</select>'
                         +'<br>'
-                        +'<p id="note" style="margin-bottom:20px;">note: faster means bigger output file size</p>'
+                        +'<p id="note" style="margin-bottom:20px;">note: faster means bigger size</p>'
                         +'<input type="checkbox" id="override" name="override">'
                         +'<label for="override">override</label>'
                         +'</div>'
@@ -56,9 +57,12 @@ $(document).ready(function () {
                             +' <em></em>'
                         +'</p>'
                     +'</div>'
-                    +'<div class="oc-dialog-buttonrow boutons">'
+                    +'<div class="oc-dialog-buttonrow boutons" id="buttons">'
                         +'<a class="button primary" id="mp4">' + t('video_converter', '.MP4') + '</a>'
                         +'<a class="button primary" id="avi">' + t('video_converter', '.AVI') + '</a>'
+                        +'<a class="button primary" id="m4v">' + t('video_converter', '.M4V') + '</a>'
+                        +'<a class="button primary" id="webm">' + t('video_converter', '.WEBM') + '</a>'
+
                         +'</div>'
                 );
                 var finished = false;
@@ -71,19 +75,20 @@ $(document).ready(function () {
                 }); 
                 document.getElementById("preset").addEventListener("change", function (element){
                     console.log(element.srcElement.value);
+                    preset = element.srcElement.value;
                 }); 
                 document.getElementById("linkeditor_overlay").addEventListener("click", function(){
                     close();
                     finished = true;
                 }); 
                 document.getElementById("avi").addEventListener("click", function ($element){
-                    console.log($element.target.id);
                     if (context.fileInfoModel.attributes.mountType == "external"){
                         var data = {
                             nameOfFile: filename,
                             directory: '/'+context.dir.split('/').slice(2).join('/'),
                             external : 1,
                             type: $element.target.id,
+                            preset: preset,
                         };
                     }else{
                         var data = {
@@ -91,9 +96,9 @@ $(document).ready(function () {
                             directory: context.dir,
                             external : 0,
                             type: $element.target.id,
+                            preset: preset,
                         };
                     }
-                    console.log("test");
                     $.ajax({
                         type: "POST",
                         async: "true",
@@ -103,9 +108,10 @@ $(document).ready(function () {
                             document.getElementById("loading").style.display= "block";
                             document.getElementById("checkOverride").style.display= "none";
                             document.getElementById("text").style.display= "none";
-                            document.getElementById("preset").style.display= "block";
-                            document.getElementById("labelPreset").style.display= "block";
-                            document.getElementById("note").style.display= "block";
+                            document.getElementById("preset").style.display= "none";
+                            document.getElementById("labelPreset").style.display= "none";
+                            document.getElementById("note").style.display= "none";
+                            document.getElementById("buttons").style.display= "none";
 
                         },
                         success: function() {
@@ -119,13 +125,13 @@ $(document).ready(function () {
                     });
                 }); 
                 document.getElementById("mp4").addEventListener("click", function ($element){
-                    console.log($element.target.id);
                     if (context.fileInfoModel.attributes.mountType == "external"){
                         var data = {
                             nameOfFile: filename,
                             directory: '/'+context.dir.split('/').slice(2).join('/'),
                             external : 1,
                             type: $element.target.id,
+                            preset: preset,
                         };
                     }else{
                         var data = {
@@ -133,17 +139,108 @@ $(document).ready(function () {
                             directory: context.dir,
                             external : 0,
                             type: $element.target.id,
+                            preset: preset,
                         };
                     }
                     $.ajax({
                         type: "POST",
-                        async: "false",
+                        async: "true",
                         url: OC.filePath('video_converter', 'ajax','convertHere.php'),
                         data: data,
                         beforeSend: function() {
                             document.getElementById("loading").style.display= "block";
                             document.getElementById("checkOverride").style.display= "none";
                             document.getElementById("text").style.display= "none";
+                            document.getElementById("preset").style.display= "none";
+                            document.getElementById("labelPreset").style.display= "none";
+                            document.getElementById("note").style.display= "none";
+                            document.getElementById("buttons").style.display= "none";
+
+                        },
+                        success: function() {
+                            this.filesClient = OC.Files.getClient();
+                            if (override){
+                                this.filesClient.remove(context.dir+"/"+filename);
+                            }
+                            context.fileList.reload();
+                            close();
+                        }
+                    });
+                }); 
+                document.getElementById("m4v").addEventListener("click", function ($element){
+                    if (context.fileInfoModel.attributes.mountType == "external"){
+                        var data = {
+                            nameOfFile: filename,
+                            directory: '/'+context.dir.split('/').slice(2).join('/'),
+                            external : 1,
+                            type: $element.target.id,
+                            preset: preset,
+                        };
+                    }else{
+                        var data = {
+                            nameOfFile: filename,
+                            directory: context.dir,
+                            external : 0,
+                            type: $element.target.id,
+                            preset: preset,
+                        };
+                    }
+                    $.ajax({
+                        type: "POST",
+                        async: "true",
+                        url: OC.filePath('video_converter', 'ajax','convertHere.php'),
+                        data: data,
+                        beforeSend: function() {
+                            document.getElementById("loading").style.display= "block";
+                            document.getElementById("checkOverride").style.display= "none";
+                            document.getElementById("text").style.display= "none";
+                            document.getElementById("preset").style.display= "none";
+                            document.getElementById("labelPreset").style.display= "none";
+                            document.getElementById("note").style.display= "none";
+                            document.getElementById("buttons").style.display= "none";
+
+                        },
+                        success: function() {
+                            this.filesClient = OC.Files.getClient();
+                            if (override){
+                                this.filesClient.remove(context.dir+"/"+filename);
+                            }
+                            context.fileList.reload();
+                            close();
+                        }
+                    });
+                });
+                document.getElementById("webm").addEventListener("click", function ($element){
+                    if (context.fileInfoModel.attributes.mountType == "external"){
+                        var data = {
+                            nameOfFile: filename,
+                            directory: '/'+context.dir.split('/').slice(2).join('/'),
+                            external : 1,
+                            type: $element.target.id,
+                            preset: preset,
+                        };
+                    }else{
+                        var data = {
+                            nameOfFile: filename,
+                            directory: context.dir,
+                            external : 0,
+                            type: $element.target.id,
+                            preset: preset,
+                        };
+                    }
+                    $.ajax({
+                        type: "POST",
+                        async: "true",
+                        url: OC.filePath('video_converter', 'ajax','convertHere.php'),
+                        data: data,
+                        beforeSend: function() {
+                            document.getElementById("loading").style.display= "block";
+                            document.getElementById("checkOverride").style.display= "none";
+                            document.getElementById("text").style.display= "none";
+                            document.getElementById("preset").style.display= "none";
+                            document.getElementById("labelPreset").style.display= "none";
+                            document.getElementById("note").style.display= "none";
+                            document.getElementById("buttons").style.display= "none";
 
                         },
                         success: function() {
@@ -159,8 +256,9 @@ $(document).ready(function () {
             }
             });
             
-        }
+        },
     }
+   
     function close(){
         $('#linkeditor_container').remove();
         $('#linkeditor_overlay').remove();

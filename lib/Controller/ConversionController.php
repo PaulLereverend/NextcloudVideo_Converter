@@ -1,16 +1,11 @@
 <?php
 namespace OCA\Video_Converter\Controller;
-include __DIR__.'/../vendor/autoload.php';
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 use \OCP\IConfig;
-use FFMpeg;
-use FFMpeg\Media;
-use FFProbe;
-use FFMpeg\Driver;
 
 class ConversionController extends Controller {
 	private $config;
@@ -31,33 +26,25 @@ class ConversionController extends Controller {
 		}
 		return $externalMountPoints;
 	}
-    public function convertHere($nameOfFile, $directory, $external, $type) {
-		$ffmpeg = FFMpeg\FFMpeg::create();
-		$format = new FFMpeg\Format\Video\X264();
+    public function convertHere($nameOfFile, $directory, $external, $type, $preset) {
 		if ($external){
 			$externalUrl = $this->getExternalMP();
 			foreach ($externalUrl as $url) {
-				$video = $ffmpeg->open($url.$directory.'/'.$nameOfFile);
-				try {
-					 $video->save($format, $url.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);
-					 echo "ok";
-					 return;
-				} catch (ExecutionFailureException $th) {
-					echo $th;
-				}
-
+				$cmd = $this->createCmd($url.$directory,$nameOfFile,$preset,$type);
+				echo exec($cmd);
 			}
 			echo "ko";
 		}else{
-				$video = $ffmpeg->open($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile);
-				try {
-					$video->save($format, $this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'//'.pathinfo($nameOfFile)['filename'].'.'.$type);
-					self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);					
-				
-				} catch (ExecutionFailureException $th) {
-					echo $th;
-				}
+			$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type);
+			echo exec($cmd);
+			self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);					
 		}
+	}
+
+	public function createCmd($link,$filename,$preset,$output){
+		$cmd = "ffmpeg -y -i '".$link.$filename."' -preset ".$preset." '".$link.pathinfo($filename)['filename'].".".$output."'";
+		echo $cmd;
+		return $cmd;
 	}
 	protected function scanFolder($path)
     {

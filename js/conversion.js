@@ -111,8 +111,7 @@ $(document).ready(function () {
                             document.getElementById("preset").style.display= "none";
                             document.getElementById("labelPreset").style.display= "none";
                             document.getElementById("note").style.display= "none";
-                            document.getElementById("buttons").style.display= "none";
-
+                            document.getElementById("buttons").setAttribute('style', 'display: none !important');
                         },
                         success: function() {
                             this.filesClient = OC.Files.getClient();

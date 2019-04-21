@@ -3,9 +3,10 @@
 }
 .boutons{
 	text-align: center !important;
-	display: inline-block !important;
+	display: inline-block;
 	height: 30px !important;
 	margin-top: 10px;
+	padding-top: 0px !important;
 }
 .sk-circle {
 	margin: auto;

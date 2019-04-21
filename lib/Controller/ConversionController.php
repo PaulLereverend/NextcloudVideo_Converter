@@ -30,14 +30,16 @@ class ConversionController extends Controller {
 		if ($external){
 			$externalUrl = $this->getExternalMP();
 			foreach ($externalUrl as $url) {
-				if (file_exists($url.$directory.$nameOfFile)){
-					$cmd = $this->createCmd($url.$directory,$nameOfFile,$preset,$type);
+				echo $url.$directory.'/'.$nameOfFile;
+				if (file_exists($url.$directory.'/'.$nameOfFile)){
+					$cmd = $this->createCmd($url.$directory.'/',$nameOfFile,$preset,$type);
 					exec($cmd);
 					return;
 				}
 			}
 			echo "ko";
 		}else{
+			echo $this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile;
 			if (file_exists($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile)){
 				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type);
 				exec($cmd);

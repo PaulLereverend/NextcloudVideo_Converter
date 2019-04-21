@@ -9,7 +9,6 @@
         }
     ],
     "require": {
-        "php-ffmpeg/php-ffmpeg": "^0.13.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.4"

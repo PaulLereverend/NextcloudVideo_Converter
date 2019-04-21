@@ -24,3 +24,7 @@ Place this app in **nextcloud/apps/**
 
 * Choose codec
 * Support encrypted files
+
+## PREVIEW 
+
+![alt text](https://raw.githubusercontent.com/PaulLereverend/NextcloudVideo_Converter/master/img/appstore.gif)

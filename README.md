@@ -19,7 +19,6 @@ Place this app in **nextcloud/apps/**
 ## Requirements
 
 * FFmpeg
-* FFprobe
 
 ## TODO
 

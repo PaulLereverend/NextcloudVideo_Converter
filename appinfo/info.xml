@@ -4,16 +4,23 @@
     <id>video_converter</id>
     <name>Video converter</name>
     <summary>Convert videos within the web interface</summary>
-    <screenshot>https://github.com/PaulLereverend/NextcloudVideo_Converter/blob/master/img/appstore.gif</screenshot>
+    <screenshot>https://raw.githubusercontent.com/PaulLereverend/NextcloudVideo_Converter/master/img/appstore.gif</screenshot>
     <description><![CDATA[Convert videos within the web interface
 
-*  **Features :** MP4 and AVI output
+*  **Features :**  
+    * Video Conversion
+    * Override or not
+    * Preset option
+    * Support external local storage
+    * More incoming...
 
 *  **Requirements :** 
     * FFmpeg
-    * FFprobe
 
-*  **Note :** More format will be added soon
+*  **Note :** 
+    * Does not currently support conversion with encryption enabled
+    * More formats will be added soon
+
 ]]></description>
     <version>0.0.2</version>
     <licence>agpl</licence>

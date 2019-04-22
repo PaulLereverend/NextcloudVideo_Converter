@@ -26,13 +26,13 @@ class ConversionController extends Controller {
 		}
 		return $externalMountPoints;
 	}
-    public function convertHere($nameOfFile, $directory, $external, $type, $preset) {
+    public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority) {
 		if ($external){
 			$externalUrl = $this->getExternalMP();
 			foreach ($externalUrl as $url) {
 				echo $url.$directory.'/'.$nameOfFile;
 				if (file_exists($url.$directory.'/'.$nameOfFile)){
-					$cmd = $this->createCmd($url.$directory.'/',$nameOfFile,$preset,$type);
+					$cmd = $this->createCmd($url.$directory.'/',$nameOfFile,$preset,$type, $priority);
 					exec($cmd);
 					return;
 				}
@@ -41,7 +41,7 @@ class ConversionController extends Controller {
 		}else{
 			echo $this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile;
 			if (file_exists($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile)){
-				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type);
+				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority);
 				exec($cmd);
 				self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);
 			}else{
@@ -50,8 +50,12 @@ class ConversionController extends Controller {
 		}
 	}
 
-	public function createCmd($link,$filename,$preset,$output){
-		$cmd = "ffmpeg -y -i '".$link.$filename."' -preset ".$preset." '".$link.pathinfo($filename)['filename'].".".$output."'";
+	public function createCmd($link,$filename,$preset,$output, $priority){
+		if ($priority != "0"){
+			$cmd = "nice -n ".$priority." ffmpeg -y -i '".$link.$filename."' -preset ".$preset." '".$link.pathinfo($filename)['filename'].".".$output."'";
+		}else{
+			$cmd = "ffmpeg -y -i '".$link.$filename."' -preset ".$preset." '".$link.pathinfo($filename)['filename'].".".$output."'";
+		}
 		echo $cmd;
 		return $cmd;
 	}

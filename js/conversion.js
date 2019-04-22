@@ -18,6 +18,7 @@ $(document).ready(function () {
                     var self = this;
                     var override = false;
                     var preset = "medium";
+                    var priority = "0";
                     var title = "Titre";
                     $('body').append(
                         '<div id="linkeditor_overlay" class="oc-dialog-dim"></div>'
@@ -33,7 +34,10 @@ $(document).ready(function () {
                         +filename 
                         + '</h2>'
                         +'<div class="sk-circle" style="display:none" id="loading"><div class="sk-circle1 sk-child"></div><div class="sk-circle2 sk-child"></div><div class="sk-circle3 sk-child"></div><div class="sk-circle4 sk-child"></div><div class="sk-circle5 sk-child"></div><div class="sk-circle6 sk-child"></div><div class="sk-circle7 sk-child"></div><div class="sk-circle8 sk-child"></div><div class="sk-circle9 sk-child"></div><div class="sk-circle10 sk-child"></div><div class="sk-circle11 sk-child"></div><div class="sk-circle12 sk-child"></div></div>'
-                        + '<div id="checkOverride">'
+                        +'<div style="text-align:center; display:none; margin-top: 10px;" id="noteLoading">'
+                        +'<p>note: it can be long depending on your hardware and the preset you choose</p>'
+                        +'</div>'
+                        +'<div id="params">'
                         +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
                         +'Preset'
                         +'</p>'
@@ -48,14 +52,25 @@ $(document).ready(function () {
                         +'<option value="veryslow">VerySlow</option>'
                         +'</select>'
                         +'<br>'
-                        +'<p id="note" style="margin-bottom:20px;">note: faster means bigger size</p>'
-                        +'<input type="checkbox" id="override" name="override">'
-                        +'<label for="override">override</label>'
+                        +'<p id="note">note: faster means bigger size</p>'
+                        +'<br>'
+                        +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
+                        +'Priority'
+                        +'</p>'
+                        + '<select id="priority" style="margin-bottom: 10px;">'
+                        +'<option value="-10">High</option>'
+                        +'<option value="0" selected>Normal (default)</option>'
+                        +'<option value="10">Low</option>'
+                        +'</select>'
                         +'</div>'
-                        +'<p class="urldisplay" id="text">'
+                        +'<p class="urldisplay" id="text" style="display: inline; margin-right: 10px;">'
                             +t('video_converter', 'Choose the output format')
                             +' <em></em>'
                         +'</p>'
+                        +'<div id="overrideDiv">'
+                        +'<input type="checkbox" id="override" name="override">'
+                        +'<label for="override">override</label>'
+                        +'</div>'
                     +'</div>'
                     +'<div class="oc-dialog-buttonrow boutons" id="buttons">'
                         +'<a class="button primary" id="mp4">' + t('video_converter', '.MP4') + '</a>'
@@ -77,6 +92,10 @@ $(document).ready(function () {
                     console.log(element.srcElement.value);
                     preset = element.srcElement.value;
                 }); 
+                document.getElementById("priority").addEventListener("change", function (element){
+                    console.log(element.srcElement.value);
+                    priority = element.srcElement.value;
+                }); 
                 document.getElementById("linkeditor_overlay").addEventListener("click", function(){
                     close();
                     finished = true;
@@ -89,6 +108,7 @@ $(document).ready(function () {
                             external : 1,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }else{
                         var data = {
@@ -97,6 +117,7 @@ $(document).ready(function () {
                             external : 0,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }
                     $.ajax({
@@ -106,7 +127,9 @@ $(document).ready(function () {
                         data: data,
                         beforeSend: function() {
                             document.getElementById("loading").style.display= "block";
-                            document.getElementById("checkOverride").style.display= "none";
+                            document.getElementById("noteLoading").style.display= "block";
+                            document.getElementById("overrideDiv").style.display= "none";
+                            document.getElementById("params").style.display= "none";
                             document.getElementById("text").style.display= "none";
                             document.getElementById("preset").style.display= "none";
                             document.getElementById("labelPreset").style.display= "none";
@@ -131,6 +154,8 @@ $(document).ready(function () {
                             external : 1,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
+
                         };
                     }else{
                         var data = {
@@ -139,6 +164,7 @@ $(document).ready(function () {
                             external : 0,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }
                     $.ajax({
@@ -148,7 +174,9 @@ $(document).ready(function () {
                         data: data,
                         beforeSend: function() {
                             document.getElementById("loading").style.display= "block";
-                            document.getElementById("checkOverride").style.display= "none";
+                            document.getElementById("noteLoading").style.display= "block";
+                            document.getElementById("overrideDiv").style.display= "none";
+                            document.getElementById("params").style.display= "none";
                             document.getElementById("text").style.display= "none";
                             document.getElementById("preset").style.display= "none";
                             document.getElementById("labelPreset").style.display= "none";
@@ -174,6 +202,7 @@ $(document).ready(function () {
                             external : 1,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }else{
                         var data = {
@@ -182,6 +211,7 @@ $(document).ready(function () {
                             external : 0,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }
                     $.ajax({
@@ -191,7 +221,9 @@ $(document).ready(function () {
                         data: data,
                         beforeSend: function() {
                             document.getElementById("loading").style.display= "block";
-                            document.getElementById("checkOverride").style.display= "none";
+                            document.getElementById("noteLoading").style.display= "block";
+                            document.getElementById("overrideDiv").style.display= "none";
+                            document.getElementById("params").style.display= "none";
                             document.getElementById("text").style.display= "none";
                             document.getElementById("preset").style.display= "none";
                             document.getElementById("labelPreset").style.display= "none";
@@ -217,6 +249,7 @@ $(document).ready(function () {
                             external : 1,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }else{
                         var data = {
@@ -225,6 +258,7 @@ $(document).ready(function () {
                             external : 0,
                             type: $element.target.id,
                             preset: preset,
+                            priority: priority,
                         };
                     }
                     $.ajax({
@@ -234,7 +268,9 @@ $(document).ready(function () {
                         data: data,
                         beforeSend: function() {
                             document.getElementById("loading").style.display= "block";
-                            document.getElementById("checkOverride").style.display= "none";
+                            document.getElementById("noteLoading").style.display= "block";
+                            document.getElementById("overrideDiv").style.display= "none";
+                            document.getElementById("params").style.display= "none";
                             document.getElementById("text").style.display= "none";
                             document.getElementById("preset").style.display= "none";
                             document.getElementById("labelPreset").style.display= "none";

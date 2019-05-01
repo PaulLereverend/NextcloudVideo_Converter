@@ -14,10 +14,5 @@ return [
             'url'  => 'ajax/convertHere.php',
             'verb' => 'POST'
         ],
-        [
-            'name' => 'conversion#getPercentage',
-            'url'  => 'ajax/getPercentage.php',
-            'verb' => 'POST'
-        ],
     ]
 ];

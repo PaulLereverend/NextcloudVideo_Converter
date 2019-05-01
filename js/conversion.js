@@ -9,7 +9,6 @@ $(document).ready(function () {
 				type: OCA.Files.FileActions.TYPE_DROPDOWN,
 				iconClass: 'icon-convert',
 				actionHandler: function (filename, context) {
-
                     var a = context.$file[0].children[1].children[0].children[0].innerHTML;
                     var b = 'background-repeat:no-repeat;margin-right:1px;display: block;width: 40px;height: 32px;white-space: nowrap;border-image-repeat: stretch;border-image-slice: initial;background-size: 32px;';
                     var position = 30;

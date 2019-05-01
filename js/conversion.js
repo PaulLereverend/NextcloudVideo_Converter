@@ -5,7 +5,7 @@ $(document).ready(function () {
 				name: 'convert',
 				displayName: 'Convert into',
 				mime: 'video',
-				permissions: OC.PERMISSION_READ,
+				permissions: OC.PERMISSION_UPDATE,
 				type: OCA.Files.FileActions.TYPE_DROPDOWN,
 				iconClass: 'icon-convert',
 				actionHandler: function (filename, context) {
@@ -35,7 +35,7 @@ $(document).ready(function () {
                         + '</h2>'
                         +'<div class="sk-circle" style="display:none" id="loading"><div class="sk-circle1 sk-child"></div><div class="sk-circle2 sk-child"></div><div class="sk-circle3 sk-child"></div><div class="sk-circle4 sk-child"></div><div class="sk-circle5 sk-child"></div><div class="sk-circle6 sk-child"></div><div class="sk-circle7 sk-child"></div><div class="sk-circle8 sk-child"></div><div class="sk-circle9 sk-child"></div><div class="sk-circle10 sk-child"></div><div class="sk-circle11 sk-child"></div><div class="sk-circle12 sk-child"></div></div>'
                         +'<div style="text-align:center; display:none; margin-top: 10px;" id="noteLoading">'
-                        +'<p>note: it can be long depending on your hardware and the preset you choose</p>'
+                        +'<p>note: it can be very long depending on your hardware and the preset you choose. You can safely close this window</p>'
                         +'</div>'
                         +'<div id="params">'
                         +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
@@ -52,15 +52,15 @@ $(document).ready(function () {
                         +'<option value="veryslow">VerySlow</option>'
                         +'</select>'
                         +'<br>'
-                        +'<p id="note">note: faster means bigger size</p>'
+                        +'<p id="note">note: faster means worse quality or bigger size</p>'
                         +'<br>'
                         +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
                         +'Priority'
                         +'</p>'
                         + '<select id="priority" style="margin-bottom: 10px;">'
                         +'<option value="-10">High</option>'
-                        +'<option value="0" selected>Normal (default)</option>'
-                        +'<option value="10">Low</option>'
+                        +'<option value="0">Normal (default)</option>'
+                        +'<option value="10" selected>Low</option>'
                         +'</select>'
                         +'</div>'
                         +'<p class="urldisplay" id="text" style="display: inline; margin-right: 10px;">'
@@ -100,193 +100,69 @@ $(document).ready(function () {
                     close();
                     finished = true;
                 }); 
-                document.getElementById("avi").addEventListener("click", function ($element){
-                    if (context.fileInfoModel.attributes.mountType == "external"){
-                        var data = {
-                            nameOfFile: filename,
-                            directory: '/'+context.dir.split('/').slice(2).join('/'),
-                            external : 1,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }else{
-                        var data = {
-                            nameOfFile: filename,
-                            directory: context.dir,
-                            external : 0,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }
-                    $.ajax({
-                        type: "POST",
-                        async: "true",
-                        url: OC.filePath('video_converter', 'ajax','convertHere.php'),
-                        data: data,
-                        beforeSend: function() {
-                            document.getElementById("loading").style.display= "block";
-                            document.getElementById("noteLoading").style.display= "block";
-                            document.getElementById("overrideDiv").style.display= "none";
-                            document.getElementById("params").style.display= "none";
-                            document.getElementById("text").style.display= "none";
-                            document.getElementById("preset").style.display= "none";
-                            document.getElementById("labelPreset").style.display= "none";
-                            document.getElementById("note").style.display= "none";
-                            document.getElementById("buttons").setAttribute('style', 'display: none !important');
-                        },
-                        success: function() {
-                            this.filesClient = OC.Files.getClient();
-                            if (override){
-                                this.filesClient.remove(context.dir+"/"+filename);
-                            }
-                            context.fileList.reload();
-                            close();
-                        }
-                    });
-                }); 
-                document.getElementById("mp4").addEventListener("click", function ($element){
-                    if (context.fileInfoModel.attributes.mountType == "external"){
-                        var data = {
-                            nameOfFile: filename,
-                            directory: '/'+context.dir.split('/').slice(2).join('/'),
-                            external : 1,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
 
-                        };
-                    }else{
-                        var data = {
-                            nameOfFile: filename,
-                            directory: context.dir,
-                            external : 0,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }
-                    $.ajax({
-                        type: "POST",
-                        async: "true",
-                        url: OC.filePath('video_converter', 'ajax','convertHere.php'),
-                        data: data,
-                        beforeSend: function() {
-                            document.getElementById("loading").style.display= "block";
-                            document.getElementById("noteLoading").style.display= "block";
-                            document.getElementById("overrideDiv").style.display= "none";
-                            document.getElementById("params").style.display= "none";
-                            document.getElementById("text").style.display= "none";
-                            document.getElementById("preset").style.display= "none";
-                            document.getElementById("labelPreset").style.display= "none";
-                            document.getElementById("note").style.display= "none";
-                            document.getElementById("buttons").style.display= "none";
-
-                        },
-                        success: function() {
-                            this.filesClient = OC.Files.getClient();
-                            if (override){
-                                this.filesClient.remove(context.dir+"/"+filename);
-                            }
-                            context.fileList.reload();
-                            close();
+                var types = ['avi', 'mp4', 'm4v', 'webm'];
+                types.forEach(type => {
+                    document.getElementById(type).addEventListener("click", function ($element){
+                        if (context.fileInfoModel.attributes.mountType == "external"){
+                            var data = {
+                                nameOfFile: filename,
+                                directory: '/'+context.dir.split('/').slice(2).join('/'),
+                                external : 1,
+                                type: $element.target.id,
+                                preset: preset,
+                                priority: priority,
+                            };
+                        }else{
+                            var data = {
+                                nameOfFile: filename,
+                                directory: context.dir,
+                                external : 0,
+                                type: $element.target.id,
+                                preset: preset,
+                                priority: priority,
+                                shareOwner : context.fileList.dirInfo.shareOwnerId,
+                            };
                         }
-                    });
-                }); 
-                document.getElementById("m4v").addEventListener("click", function ($element){
-                    if (context.fileInfoModel.attributes.mountType == "external"){
-                        var data = {
-                            nameOfFile: filename,
-                            directory: '/'+context.dir.split('/').slice(2).join('/'),
-                            external : 1,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }else{
-                        var data = {
-                            nameOfFile: filename,
-                            directory: context.dir,
-                            external : 0,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }
-                    $.ajax({
-                        type: "POST",
-                        async: "true",
-                        url: OC.filePath('video_converter', 'ajax','convertHere.php'),
-                        data: data,
-                        beforeSend: function() {
-                            document.getElementById("loading").style.display= "block";
-                            document.getElementById("noteLoading").style.display= "block";
-                            document.getElementById("overrideDiv").style.display= "none";
-                            document.getElementById("params").style.display= "none";
-                            document.getElementById("text").style.display= "none";
-                            document.getElementById("preset").style.display= "none";
-                            document.getElementById("labelPreset").style.display= "none";
-                            document.getElementById("note").style.display= "none";
-                            document.getElementById("buttons").style.display= "none";
-
-                        },
-                        success: function() {
-                            this.filesClient = OC.Files.getClient();
-                            if (override){
-                                this.filesClient.remove(context.dir+"/"+filename);
+                        var tr = context.fileList.findFileEl(filename);
+				        context.fileList.showFileBusyState(tr, true);
+                        $.ajax({
+                            type: "POST",
+                            async: "true",
+                            url: OC.filePath('video_converter', 'ajax','convertHere.php'),
+                            data: data,
+                            beforeSend: function() {
+                                document.getElementById("loading").style.display= "block";
+                                document.getElementById("noteLoading").style.display= "block";
+                                document.getElementById("overrideDiv").style.display= "none";
+                                document.getElementById("params").style.display= "none";
+                                document.getElementById("text").style.display= "none";
+                                document.getElementById("preset").style.display= "none";
+                                document.getElementById("labelPreset").style.display= "none";
+                                document.getElementById("note").style.display= "none";
+                                document.getElementById("buttons").setAttribute('style', 'display: none !important');
+                            },
+                            success: function(element) {
+                                element = element.replace(/null/g, '');
+                                response = JSON.parse(element);
+                                if(response.code == 1){
+                                    this.filesClient = OC.Files.getClient();
+                                    if (override){
+                                        this.filesClient.remove(context.dir+"/"+filename);
+                                    }
+                                    close();
+                                    context.fileList.reload();
+                                }else{
+                                    context.fileList.showFileBusyState(tr, false);
+                                    close();
+                                    OC.dialogs.alert(
+                                        t('video_converter', response.desc),
+                                        t('video_converter', 'Error converting '+filename)
+                                    );
+                                }
                             }
-                            context.fileList.reload();
-                            close();
-                        }
-                    });
-                });
-                document.getElementById("webm").addEventListener("click", function ($element){
-                    if (context.fileInfoModel.attributes.mountType == "external"){
-                        var data = {
-                            nameOfFile: filename,
-                            directory: '/'+context.dir.split('/').slice(2).join('/'),
-                            external : 1,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }else{
-                        var data = {
-                            nameOfFile: filename,
-                            directory: context.dir,
-                            external : 0,
-                            type: $element.target.id,
-                            preset: preset,
-                            priority: priority,
-                        };
-                    }
-                    $.ajax({
-                        type: "POST",
-                        async: "true",
-                        url: OC.filePath('video_converter', 'ajax','convertHere.php'),
-                        data: data,
-                        beforeSend: function() {
-                            document.getElementById("loading").style.display= "block";
-                            document.getElementById("noteLoading").style.display= "block";
-                            document.getElementById("overrideDiv").style.display= "none";
-                            document.getElementById("params").style.display= "none";
-                            document.getElementById("text").style.display= "none";
-                            document.getElementById("preset").style.display= "none";
-                            document.getElementById("labelPreset").style.display= "none";
-                            document.getElementById("note").style.display= "none";
-                            document.getElementById("buttons").style.display= "none";
-
-                        },
-                        success: function() {
-                            this.filesClient = OC.Files.getClient();
-                            if (override){
-                                this.filesClient.remove(context.dir+"/"+filename);
-                            }
-                            context.fileList.reload();
-                            close();
-                        }
-                    });
+                        });
+                    }); 
                 });
             }
             });

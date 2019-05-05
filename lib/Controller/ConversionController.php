@@ -38,6 +38,7 @@ class ConversionController extends Controller {
 		$response = array();
 		if ($external){
 			$externalUrl = $this->getExternalMP();
+			//$desc = "";
 			foreach ($externalUrl as $url) {
 				if (file_exists($url.$directory.'/'.$nameOfFile)){
 					$cmd = $this->createCmd($url.$directory.'/',$nameOfFile,$preset,$type, $priority);
@@ -46,17 +47,17 @@ class ConversionController extends Controller {
 						$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available"));
 						return json_encode($response);
 					}else{
-						//$override = 0;
-						//echo $override;
 						if ($override == "true"){
 							unlink($url.$directory.'/'.$nameOfFile);
 						}
 						$response = array_merge($response, array("code" => 1));
 						return json_encode($response);
 					}
+				}else{
+					$desc .= $url.$directory.'/'.$nameOfFile." not found ";
 				}
 			}
-			$response = array_merge($response, array("code" => 0, "desc" => "Can't find archive on external local storage"));
+			$response = array_merge($response, array("code" => 0, "desc" => "Can't find video on external local storage ".$desc));
 			return json_encode($response);
 		}else{
 			if ($shareOwner != null){

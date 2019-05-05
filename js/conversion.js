@@ -111,6 +111,7 @@ $(document).ready(function () {
                                 type: $element.target.id,
                                 preset: preset,
                                 priority: priority,
+                                override : override,
                             };
                         }else{
                             var data = {

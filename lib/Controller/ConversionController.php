@@ -34,7 +34,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $shareOwner = null) {
+	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $override = false, $shareOwner = null) {
 		$response = array();
 		if ($external){
 			$externalUrl = $this->getExternalMP();
@@ -46,7 +46,11 @@ class ConversionController extends Controller {
 						$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available"));
 						return json_encode($response);
 					}else{
-						unlink($url.$directory.'/'.$nameOfFile);
+						//$override = 0;
+						//echo $override;
+						if ($override == "true"){
+							unlink($url.$directory.'/'.$nameOfFile);
+						}
 						$response = array_merge($response, array("code" => 1));
 						return json_encode($response);
 					}

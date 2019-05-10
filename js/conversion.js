@@ -99,70 +99,77 @@ $(document).ready(function () {
                     close();
                     finished = true;
                 }); 
-
+                var fileExt = filename.split('.').pop();
                 var types = ['avi', 'mp4', 'm4v', 'webm'];
                 types.forEach(type => {
-                    document.getElementById(type).addEventListener("click", function ($element){
-                        if (context.fileInfoModel.attributes.mountType == "external"){
-                            var data = {
-                                nameOfFile: filename,
-                                directory: '/'+context.dir.split('/').slice(2).join('/'),
-                                external : 1,
-                                type: $element.target.id,
-                                preset: preset,
-                                priority: priority,
-                                override : override,
-                            };
-                        }else{
-                            var data = {
-                                nameOfFile: filename,
-                                directory: context.dir,
-                                external : 0,
-                                type: $element.target.id,
-                                preset: preset,
-                                priority: priority,
-                                shareOwner : context.fileList.dirInfo.shareOwnerId,
-                            };
-                        }
-                        var tr = context.fileList.findFileEl(filename);
-				        context.fileList.showFileBusyState(tr, true);
-                        $.ajax({
-                            type: "POST",
-                            async: "true",
-                            url: OC.filePath('video_converter', 'ajax','convertHere.php'),
-                            data: data,
-                            beforeSend: function() {
-                                document.getElementById("loading").style.display= "block";
-                                document.getElementById("noteLoading").style.display= "block";
-                                document.getElementById("overrideDiv").style.display= "none";
-                                document.getElementById("params").style.display= "none";
-                                document.getElementById("text").style.display= "none";
-                                document.getElementById("preset").style.display= "none";
-                                document.getElementById("labelPreset").style.display= "none";
-                                document.getElementById("note").style.display= "none";
-                                document.getElementById("buttons").setAttribute('style', 'display: none !important');
-                            },
-                            success: function(element) {
-                                element = element.replace(/null/g, '');
-                                response = JSON.parse(element);
-                                if(response.code == 1){
-                                    this.filesClient = OC.Files.getClient();
-                                    if (override){
-                                        this.filesClient.remove(context.dir+"/"+filename);
-                                    }
-                                    close();
-                                    context.fileList.reload();
-                                }else{
-                                    context.fileList.showFileBusyState(tr, false);
-                                    close();
-                                    OC.dialogs.alert(
-                                        t('video_converter', response.desc),
-                                        t('video_converter', 'Error converting '+filename)
-                                    );
-                                }
+                    if(type == fileExt){
+                        document.getElementById(type).setAttribute('style', 'background-color: lightgray; border-color:lightgray;');
+                    }else{
+                        document.getElementById(type).addEventListener("click", function ($element){
+                            if (context.fileInfoModel.attributes.mountType == "external"){
+                                var data = {
+                                    nameOfFile: filename,
+                                    directory: '/'+context.dir.split('/').slice(2).join('/'),
+                                    external : 1,
+                                    type: $element.target.id,
+                                    preset: preset,
+                                    priority: priority,
+                                    override : override,
+                                    mtime: context.fileInfoModel.attributes.mtime,
+                                };
+                            }else{
+                                var data = {
+                                    nameOfFile: filename,
+                                    directory: context.dir,
+                                    external : 0,
+                                    type: $element.target.id,
+                                    preset: preset,
+                                    priority: priority,
+                                    shareOwner : context.fileList.dirInfo.shareOwnerId,
+                                };
                             }
+                            var tr = context.fileList.findFileEl(filename);
+                            context.fileList.showFileBusyState(tr, true);
+                            $.ajax({
+                                type: "POST",
+                                async: "true",
+                                url: OC.filePath('video_converter', 'ajax','convertHere.php'),
+                                data: data,
+                                beforeSend: function() {
+                                    document.getElementById("loading").style.display= "block";
+                                    document.getElementById("noteLoading").style.display= "block";
+                                    document.getElementById("overrideDiv").style.display= "none";
+                                    document.getElementById("params").style.display= "none";
+                                    document.getElementById("text").style.display= "none";
+                                    document.getElementById("preset").style.display= "none";
+                                    document.getElementById("labelPreset").style.display= "none";
+                                    document.getElementById("note").style.display= "none";
+                                    document.getElementById("buttons").setAttribute('style', 'display: none !important');
+                                },
+                                success: function(element) {
+                                    element = element.replace(/null/g, '');
+                                    console.log(element);
+                                    response = JSON.parse(element);
+                                    if(response.code == 1){
+                                        this.filesClient = OC.Files.getClient();
+                                        if (override){
+                                            this.filesClient.remove(context.dir+"/"+filename);
+                                        }
+                                        close();
+                                        context.fileList.reload();
+                                    }else{
+                                        context.fileList.showFileBusyState(tr, false);
+                                        close();
+                                        OC.dialogs.alert(
+                                            t('video_converter', response.desc),
+                                            t('video_converter', 'Error converting '+filename)
+                                        );
+                                    }
+                                }
+                            });
                         });
-                    }); 
+                    }
+                     
                 });
             }
             });

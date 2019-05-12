@@ -22,6 +22,7 @@ Place this app in **nextcloud/apps/**
 
 ## TODO
 
+* Convert multiple files at once
 * Choose codec
 * Support encrypted files
 

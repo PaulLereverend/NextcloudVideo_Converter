@@ -109,7 +109,7 @@ $(document).ready(function () {
                             if (context.fileInfoModel.attributes.mountType == "external"){
                                 var data = {
                                     nameOfFile: filename,
-                                    directory: '/'+context.dir.split('/').slice(2).join('/'),
+                                    directory: context.dir,
                                     external : 1,
                                     type: $element.target.id,
                                     preset: preset,

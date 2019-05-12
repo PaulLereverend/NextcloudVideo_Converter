@@ -25,8 +25,8 @@ class ConversionController extends Controller {
 		$mounts = \OC_Mount_Config::getAbsoluteMountPoints($this->UserId);
 		$externalMountPoints = array();
 		foreach($mounts as $mount){
-			if ($mount["backend"] == "Local"){
-				$externalMountPoints[] = $mount["options"]["datadir"];
+			if ($mount["class"] == "local"){
+				$externalMountPoints[$mount["mountpoint"]] = $mount["options"]["datadir"];
 			}
 		}
 		return $externalMountPoints;
@@ -34,29 +34,43 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $override = false, $shareOwner = null) {
+	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $override = false, $shareOwner = null, $mtime = 0) {
 		$response = array();
 		if ($external){
 			$externalUrl = $this->getExternalMP();
 			$desc = "";
-			foreach ($externalUrl as $url) {
-				if (file_exists($url.$directory.'/'.$nameOfFile)){
-					$cmd = $this->createCmd($url.$directory.'/',$nameOfFile,$preset,$type, $priority);
-					exec($cmd, $output,$return);
-					if($return == 127){
-						$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available"));
-						return json_encode($response);
-					}else{
-						if ($override == "true"){
-							unlink($url.$directory.'/'.$nameOfFile);
+			$dircpt = substr($directory, 1);
+			while ($dircpt != ""){
+				if (array_key_exists($dircpt, $externalUrl)){
+					$url = $externalUrl[$dircpt];
+					$dircpt = str_replace($dircpt, "", $directory);
+					if (file_exists($url.'/'.$dircpt.'/'.$nameOfFile)){
+						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority);
+						exec($cmd, $output,$return);
+						if($return == 127){
+							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available"));
+							return json_encode($response);
+						}else{
+							if ($override == "true"){
+								unlink($url.'/'.$directory.'/'.$nameOfFile);
+							}
+							$response = array_merge($response, array("code" => 1));
+							return json_encode($response);
 						}
-						$response = array_merge($response, array("code" => 1));
+					}else{
+						$response = array_merge($response, array("code" => 0, "desc" => "Can't find video on external local storage : ".$url.'/'.$dircpt.'/'.$nameOfFile));
 						return json_encode($response);
 					}
+				}else{
+					$pos = strrpos( $dircpt, '/');
+					if ($pos == false){
+						$dircpt = "/";
+					}else{
+						$dircpt= substr($dircpt, 0, $pos);
+					}
 				}
-				$desc .= $url.$directory.'/'.$nameOfFile." not found ";
 			}
-			$response = array_merge($response, array("code" => 0, "desc" => "Can't find video on external local storage : ".$desc));
+			$response = array_merge($response, array("code" => 0, "desc" => "Can't find video on external local storage"));
 			return json_encode($response);
 		}else{
 			if ($shareOwner != null){
@@ -106,6 +120,7 @@ class ConversionController extends Controller {
 		}else{
 			$middleArgs = "-preset ".escapeshellarg($preset);
 		}
+		//echo $link;
 		$cmd = " ffmpeg -y -i ".escapeshellarg($link.$filename)." ".$middleArgs." ".escapeshellarg($link.pathinfo($filename)['filename'].".".$output);
 		if ($priority != "0"){
 			$cmd = "nice -n ".escapeshellarg($priority).$cmd;

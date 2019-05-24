@@ -48,7 +48,8 @@ class ConversionController extends Controller {
 						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority);
 						exec($cmd, $output,$return);
 						if($return == 127){
-							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available"));
+							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
+							DEBUG: ".$url.'/'.$dircpt.'/'.$nameOfFile));
 							return json_encode($response);
 						}else{
 							if ($override == "true"){
@@ -80,7 +81,8 @@ class ConversionController extends Controller {
 				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority);
 				exec($cmd, $output,$return);
 				if($return == 127){
-					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available"));
+					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
+					 DEBUG: ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile));
 					return json_encode($response);
 				}
 				$scan = self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);
@@ -118,7 +120,7 @@ class ConversionController extends Controller {
 					break;
 			}
 		}else{
-			$middleArgs = "-preset ".escapeshellarg($preset);
+			$middleArgs = "-preset ".escapeshellarg($preset). " -strict -2";
 		}
 		//echo $link;
 		$cmd = " ffmpeg -y -i ".escapeshellarg($link.$filename)." ".$middleArgs." ".escapeshellarg($link.pathinfo($filename)['filename'].".".$output);

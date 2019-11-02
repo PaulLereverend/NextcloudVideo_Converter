@@ -1,3 +1,7 @@
+## 0.1.2
+- Support for NC 17
+- Fix issue on shared folders
+
 ## 0.1.0
 - Fix : https://github.com/PaulLereverend/NextcloudVideo_Converter/issues/4
 - Fix : https://github.com/PaulLereverend/NextcloudVideo_Converter/issues/6

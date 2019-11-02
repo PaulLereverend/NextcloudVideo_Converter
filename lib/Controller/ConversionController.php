@@ -142,13 +142,13 @@ class ConversionController extends Controller {
 		try {
             $scanner->scan($path, $recusive = false);
         } catch (ForbiddenException $e) {
-			$response = array_merge($response, array("code" => 0, "desc" => $e));
+			$response = array_merge($response, array("code" => 0, "desc" => $e->getTraceAsString()));
 			return json_encode($response);
         }catch (NotFoundException $e){
 			$response = array_merge($response, array("code" => 0, "desc" => $this->l->t("Can't scan file at ").$path));
 			return json_encode($response);
 		}catch (\Exception $e){
-			$response = array_merge($response, array("code" => 0, "desc" => $e));
+			$response = array_merge($response, array("code" => 0, "desc" => $e->getTraceAsString()));
 			return json_encode($response);
 		}
 		return 1;

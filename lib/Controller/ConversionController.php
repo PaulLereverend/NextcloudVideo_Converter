@@ -85,7 +85,7 @@ class ConversionController extends Controller {
 					 DEBUG: ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile));
 					return json_encode($response);
 				}
-				$scan = self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type);
+				$scan = self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type, $this->UserId);
 				if($scan != 1){
 					return $scan;
 				}
@@ -132,19 +132,20 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function scanFolder($path)
+	public function scanFolder($path, $user)
     {
 		$response = array();
-        $user = \OC::$server->getUserSession()->getUser()->getUID();
+		/*if($user == null){
+			$user = \OC::$server->getUserSession()->getUser()->getUID();
+		}*/
 		$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
-
 		try {
             $scanner->scan($path, $recusive = false);
         } catch (ForbiddenException $e) {
 			$response = array_merge($response, array("code" => 0, "desc" => $e));
 			return json_encode($response);
         }catch (NotFoundException $e){
-			$response = array_merge($response, array("code" => 0, "desc" => "Can't scan file at ".$path));
+			$response = array_merge($response, array("code" => 0, "desc" => $this->l->t("Can't scan file at ").$path));
 			return json_encode($response);
 		}catch (\Exception $e){
 			$response = array_merge($response, array("code" => 0, "desc" => $e));

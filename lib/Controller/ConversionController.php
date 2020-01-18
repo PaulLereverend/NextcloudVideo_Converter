@@ -6,6 +6,8 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 use \OCP\IConfig;
+use OCP\EventDispatcher\IEventDispatcher;
+
 
 class ConversionController extends Controller {
 	private $config;
@@ -138,7 +140,12 @@ class ConversionController extends Controller {
 		/*if($user == null){
 			$user = \OC::$server->getUserSession()->getUser()->getUID();
 		}*/
-		$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
+		$version = \OC::$server->getConfig()->getSystemValue('version');
+		 if((int)substr($version, 0, 2) < 18){
+			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
+		 }else{
+			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(),\OC::$server->query(IEventDispatcher::class), \OC::$server->getLogger());
+		 }
 		try {
             $scanner->scan($path, $recusive = false);
         } catch (ForbiddenException $e) {

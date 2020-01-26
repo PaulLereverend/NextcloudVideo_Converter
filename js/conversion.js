@@ -21,6 +21,7 @@ $(document).ready(function () {
                     var title = "Titre";
                     var vcodec = null;
                     var vbitrate = null;
+                    var scaling = null;
                     $('body').append(
                         '<div id="linkeditor_overlay" class="oc-dialog-dim"></div>'
                         +'<div id="linkeditor_container" class="oc-dialog" style="position: fixed;">'
@@ -88,6 +89,20 @@ $(document).ready(function () {
                         +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
                         +'kbit/s'
                         +'</p>'
+                        +'<br>'
+                        +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
+                        +'Scale to'
+                        +'</p>'
+                        +'<select id="scale" style="margin-bottom: 10px;">'
+                        +'<option value="none">Keep</option>'
+                        +'<option value="wxga">WXGA (1280x720)</option>'
+                        +'<option value="hd">HD (1368x768)</option>'
+                        +'<option value="fhd">FHD (1920x1080)</option>'
+                        +'<option value="uhd">4K (3840x2160)</option>'
+                        +'<option value="600">Keep aspect 600 (Wx600)</option>'
+                        +'<option value="720">Keep aspect 720 (Wx720)</option>'
+                        +'<option value="1080">Keep aspect 1080 (Wx1080)</option>'
+                        +'</select>'
                         +'</div>'
                         +'<p class="urldisplay" id="text" style="display: inline; margin-right: 10px;">'
                             +t('video_converter', 'Choose the output format')
@@ -135,6 +150,12 @@ $(document).ready(function () {
                         vbitrate = null;
                     }
                 });
+                document.getElementById("scale").addEventListener("change", function (element){
+                    scaling = element.srcElement.value;
+                    if (scaling === "none"){
+                        scaling = null;
+                    }
+                });
                 document.getElementById("linkeditor_overlay").addEventListener("click", function(){
                     close();
                     finished = true;
@@ -156,6 +177,7 @@ $(document).ready(function () {
                                     priority: priority,
                                     codec: vcodec,
                                     vbitrate: vbitrate,
+                                    scale: scaling,
                                     override : override,
                                     mtime: context.fileInfoModel.attributes.mtime,
                                 };
@@ -169,6 +191,7 @@ $(document).ready(function () {
                                     priority: priority,
                                     codec: vcodec,
                                     vbitrate: vbitrate,
+                                    scale: scaling,
                                     shareOwner : context.fileList.dirInfo.shareOwnerId,
                                 };
                             }
@@ -188,6 +211,7 @@ $(document).ready(function () {
                                     document.getElementById("preset").style.display= "none";
                                     document.getElementById("vcodec").style.display= "none";
                                     document.getElementById("vbitrate").style.display= "none";
+                                    document.getElementById("scale").style.display= "none";
                                     document.getElementById("labelPreset").style.display= "none";
                                     document.getElementById("note").style.display= "none";
                                     document.getElementById("buttons").setAttribute('style', 'display: none !important');

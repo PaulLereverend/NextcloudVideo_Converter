@@ -47,6 +47,13 @@ appstore_build_directory=$(CURDIR)/build/artifacts/appstore
 appstore_package_name=$(appstore_build_directory)/$(app_name)
 npm=$(shell which npm 2> /dev/null)
 composer=$(shell which composer 2> /dev/null)
+platform=$(shell uname 2> /dev/null)
+
+ifeq ("Linux", "$(platform)")
+	compress_prog=$(shell which tar 2> /dev/null)
+else
+	compress_prog=$(shell which gtar 2> /dev/null)
+endif
 
 all: build
 
@@ -115,7 +122,7 @@ dist:
 source:
 	rm -rf $(source_build_directory)
 	mkdir -p $(source_build_directory)
-	gtar cvz --exclude-vcs \
+	$(compress_prog) cvz --exclude-vcs \
 	--exclude="../$(app_name)/build" \
 	--exclude="../$(app_name)/js/node_modules" \
 	--exclude="../$(app_name)/node_modules" \
@@ -128,7 +135,7 @@ source:
 appstore:
 	rm -rf $(appstore_build_directory)
 	mkdir -p $(appstore_build_directory)
-	gtar cvz --exclude-vcs \
+	$(compress_prog) cvz --exclude-vcs \
 	--exclude="../$(app_name)/build" \
 	--exclude="../$(app_name)/tests" \
 	--exclude="../$(app_name)/Makefile" \

@@ -19,6 +19,8 @@ $(document).ready(function () {
                     var preset = "medium";
                     var priority = "0";
                     var title = "Titre";
+                    var vcodec = null;
+                    var vbitrate = null;
                     $('body').append(
                         '<div id="linkeditor_overlay" class="oc-dialog-dim"></div>'
                         +'<div id="linkeditor_container" class="oc-dialog" style="position: fixed;">'
@@ -61,6 +63,31 @@ $(document).ready(function () {
                         +'<option value="0">Normal (default)</option>'
                         +'<option value="10" selected>Low</option>'
                         +'</select>'
+                        +'<br>'
+                        +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
+                        +'Codec'
+                        +'</p>'
+                        +'<select id="vcodec" style="margin-bottom: 10px;">'
+                        +'<option value="none">Auto</option>'
+                        +'<option value="x264">H264</option>'
+                        +'<option value="x265">HEVC</option>'
+                        +'</select>'
+                        +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
+                        +'Target bitrate'
+                        +'</p>'
+                        +'<select id="vbitrate" style="margin-bottom: 10px;">'
+                        +'<option value="none">Auto</option>'
+                        +'<option value="1">1k</option>'
+                        +'<option value="2">2k</option>'
+                        +'<option value="3">3k</option>'
+                        +'<option value="4">4k</option>'
+                        +'<option value="5">5k</option>'
+                        +'<option value="6">6k</option>'
+                        +'<option value="7">7k</option>'
+                        +'</select>'
+                        +'<p class="urldisplay" id="labelPreset" style="display:inline-block; margin-right:5px;">'
+                        +'kbit/s'
+                        +'</p>'
                         +'</div>'
                         +'<p class="urldisplay" id="text" style="display: inline; margin-right: 10px;">'
                             +t('video_converter', 'Choose the output format')
@@ -94,7 +121,20 @@ $(document).ready(function () {
                 document.getElementById("priority").addEventListener("change", function (element){
                     console.log(element.srcElement.value);
                     priority = element.srcElement.value;
-                }); 
+                });
+                document.getElementById("vcodec").addEventListener("change", function (element){
+                    console.log(element.srcElement.value);
+                    vcodec = element.srcElement.value;
+                    if (vcodec === "none"){
+                        vcodec = null;
+                    }
+                });
+                document.getElementById("vbitrate").addEventListener("change", function (element){
+                    vbitrate = element.srcElement.value;
+                    if (vbitrate === "none"){
+                        vbitrate = null;
+                    }
+                });
                 document.getElementById("linkeditor_overlay").addEventListener("click", function(){
                     close();
                     finished = true;
@@ -114,6 +154,8 @@ $(document).ready(function () {
                                     type: $element.target.id,
                                     preset: preset,
                                     priority: priority,
+                                    codec: vcodec,
+                                    vbitrate: vbitrate,
                                     override : override,
                                     mtime: context.fileInfoModel.attributes.mtime,
                                 };
@@ -125,6 +167,8 @@ $(document).ready(function () {
                                     type: $element.target.id,
                                     preset: preset,
                                     priority: priority,
+                                    codec: vcodec,
+                                    vbitrate: vbitrate,
                                     shareOwner : context.fileList.dirInfo.shareOwnerId,
                                 };
                             }
@@ -142,6 +186,8 @@ $(document).ready(function () {
                                     document.getElementById("params").style.display= "none";
                                     document.getElementById("text").style.display= "none";
                                     document.getElementById("preset").style.display= "none";
+                                    document.getElementById("vcodec").style.display= "none";
+                                    document.getElementById("vbitrate").style.display= "none";
                                     document.getElementById("labelPreset").style.display= "none";
                                     document.getElementById("note").style.display= "none";
                                     document.getElementById("buttons").setAttribute('style', 'display: none !important');

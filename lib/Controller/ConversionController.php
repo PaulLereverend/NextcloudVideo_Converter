@@ -36,7 +36,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $override = false, $shareOwner = null, $mtime = 0) {
+	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $override = false, $shareOwner = null, $mtime = 0) {
 		$version = \OC::$server->getConfig()->getSystemValue('version');
 		 if((int)substr($version, 0, 2) < 18){
 			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
@@ -53,7 +53,7 @@ class ConversionController extends Controller {
 					$url = $externalUrl[$dircpt];
 					$dircpt = str_replace($dircpt, "", $directory);
 					if (file_exists($url.'/'.$dircpt.'/'.$nameOfFile)){
-						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority);
+						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate);
 						exec($cmd, $output,$return);
 						if($return == 127){
 							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
@@ -86,7 +86,7 @@ class ConversionController extends Controller {
 				$this->UserId = $shareOwner;
 			}
 			if (file_exists($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile)){
-				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority);
+				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate);
 				exec($cmd, $output,$return);
 				if($return == 127){
 					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
@@ -108,7 +108,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function createCmd($link,$filename,$preset,$output, $priority){
+	public function createCmd($link,$filename,$preset,$output, $priority, $codec, $vbitrate){
 		$middleArgs = "";
 		if ($output == "webm"){
 			switch ($preset) {
@@ -128,7 +128,47 @@ class ConversionController extends Controller {
 					break;
 			}
 		}else{
-			$middleArgs = "-preset ".escapeshellarg($preset). " -strict -2";
+                        if ($codec != null){
+                            switch ($codec) {
+                                case 'x264':
+                                    $middleArgs = "-vcodec libx264 -preset ".escapeshellarg($preset). " -strict -2";
+                                    break;
+                                case 'x265':
+                                    $middleArgs = "-vcodec libx265 -preset ".escapeshellarg($preset). " -strict -2";
+                                    break;
+                            }
+                        } else {
+                                $middleArgs = "-preset ".escapeshellarg($preset). " -strict -2";
+                        }
+                        if ($vbitrate != null) {
+                            switch ($vbitrate) {
+                                case '1':
+                                    $vbitrate = '1000k';
+                                    break;
+                                case '2':
+                                    $vbitrate = '2000k';
+                                    break;
+                                case '3':
+                                    $vbitrate = '3000k';
+                                    break;
+                                case '4':
+                                    $vbitrate = '4000k';
+                                    break;
+                                case '5':
+                                    $vbitrate = '5000k';
+                                    break;
+                                case '6':
+                                    $vbitrate = '6000k';
+                                    break;
+                                case '7':
+                                    $vbitrate = '7000k';
+                                    break;
+                                default :
+                                    $vbitrate = '2000k';
+                                    break;
+                            }
+                            $middleArgs = $middleArgs." -b:v ".$vbitrate;
+                        }
 		}
 		//echo $link;
 		$cmd = " ffmpeg -y -i ".escapeshellarg($link.$filename)." ".$middleArgs." ".escapeshellarg($link.pathinfo($filename)['filename'].".".$output);

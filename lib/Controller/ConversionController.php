@@ -37,11 +37,13 @@ class ConversionController extends Controller {
 	* @NoAdminRequired
 	*/
 	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $scale = null, $override = false, $shareOwner = null, $mtime = 0) {
-		$version = \OC::$server->getConfig()->getSystemValue('version');
-		 if((int)substr($version, 0, 2) < 18){
-			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
-		 }else{
-			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(),\OC::$server->query(IEventDispatcher::class), \OC::$server->getLogger());
+		if (preg_match('/(\/|^)\.\.(\/|$)/', $nameOfFile)) {
+			$response = ['code' => 0, 'desc' => 'Can\'t find file'];
+			return json_encode($response);
+		 }
+		 if (preg_match('/(\/|^)\.\.(\/|$)/', $directory)) {
+			$response = ['code' => 0, 'desc' => 'Can\'t open file at directory'];
+			return json_encode($response);
 		 }
 		$response = array();
 		if ($external){
@@ -102,7 +104,7 @@ class ConversionController extends Controller {
 			}else{
 				$response = array_merge($response, array("code" => 0, "desc" => "Can't find video at ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile));
 				return json_encode($response);
-			}					
+			}
 		}
 	}
 	/**

@@ -1,3 +1,9 @@
+## 0.1.4
+
+- Support for NC 19
+- Add scaling options
+- Fix : https://github.com/PaulLereverend/NextcloudVideo_Converter/issues/35
+
 ## 0.1.3
 
 - Support for NC 18

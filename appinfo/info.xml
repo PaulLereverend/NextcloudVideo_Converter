@@ -22,7 +22,7 @@
     * More formats will be added soon
 
 ]]></description>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <licence>agpl</licence>
     <author mail="paulereverend@gmail.com">Paul Lereverend</author>
     <namespace>Video_converter</namespace>
@@ -31,6 +31,6 @@
     <website>https://github.com/PaulLereverend/NextcloudVideo_Converter</website>
     <bugs>https://github.com/PaulLereverend/NextcloudVideo_Converter</bugs>
     <dependencies>
-        <nextcloud min-version="13" max-version="18"/>
+        <nextcloud min-version="13" max-version="19"/>
     </dependencies>
 </info>

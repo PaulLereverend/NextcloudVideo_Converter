@@ -59,7 +59,7 @@ class ConversionController extends Controller {
 						exec($cmd, $output,$return);
 						if($return == 127){
 							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
-							DEBUG: ".$url.'/'.$dircpt.'/'.$nameOfFile));
+							DEBUG(".$return."): ".$url.'/'.$dircpt.'/'.$nameOfFile.' - '.$output));
 							return json_encode($response);
 						}else{
 							if ($override == "true"){
@@ -92,7 +92,7 @@ class ConversionController extends Controller {
 				exec($cmd, $output,$return);
 				if($return == 127){
 					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
-					 DEBUG: ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile));
+					 DEBUG(".$return."): ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile.' - '.$output));
 					return json_encode($response);
 				}
 				$scan = self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type, $this->UserId);

@@ -36,7 +36,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $override = false, $shareOwner = null, $mtime = 0) {
+	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $scale = null, $override = false, $shareOwner = null, $mtime = 0) {
 		$version = \OC::$server->getConfig()->getSystemValue('version');
 		 if((int)substr($version, 0, 2) < 18){
 			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
@@ -53,7 +53,7 @@ class ConversionController extends Controller {
 					$url = $externalUrl[$dircpt];
 					$dircpt = str_replace($dircpt, "", $directory);
 					if (file_exists($url.'/'.$dircpt.'/'.$nameOfFile)){
-						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate);
+						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate, $scale);
 						exec($cmd, $output,$return);
 						if($return == 127){
 							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
@@ -86,7 +86,7 @@ class ConversionController extends Controller {
 				$this->UserId = $shareOwner;
 			}
 			if (file_exists($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile)){
-				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate);
+				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate, $scale);
 				exec($cmd, $output,$return);
 				if($return == 127){
 					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
@@ -108,7 +108,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function createCmd($link,$filename,$preset,$output, $priority, $codec, $vbitrate){
+	public function createCmd($link,$filename,$preset,$output, $priority, $codec, $vbitrate, $scale){
 		$middleArgs = "";
 		if ($output == "webm"){
 			switch ($preset) {
@@ -168,6 +168,35 @@ class ConversionController extends Controller {
                                     break;
                             }
                             $middleArgs = $middleArgs." -b:v ".$vbitrate;
+                        }
+                        if ($scale != null) {
+                            switch ($scale) {
+                                case 'wxga':
+                                    $scale = " -vf scale=1280:720";
+                                    break;
+                                case 'hd':
+                                    $scale = " -vf scale=1368:768";
+                                    break;
+                                case 'fhd':
+                                    $scale = " -vf scale=1920:1080";
+                                    break;
+                                case 'uhd':
+                                    $scale = " -vf scale=3840:2160";
+                                    break;
+                                case '600':
+                                    $scale = " -vf scale=-1:600";
+                                    break;
+                                case '720':
+                                    $scale = " -vf scale=-1:720";
+                                    break;
+                                case '1080':
+                                    $scale = " -vf scale=-1:1080";
+                                    break;
+                                default:
+                                    $scale = "";
+                                    break;
+                            }
+                            $middleArgs = $middleArgs.$scale;
                         }
 		}
 		//echo $link;

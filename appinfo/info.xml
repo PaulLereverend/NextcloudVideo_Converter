@@ -7,17 +7,17 @@
     <screenshot>https://raw.githubusercontent.com/PaulLereverend/NextcloudVideo_Converter/master/img/appstore.gif</screenshot>
     <description><![CDATA[Convert videos within the web interface
 
-*  **Features :**  
+*  **Features:**
     * Video Conversion
-    * Override or not
+    * Optionally overwrites files
     * Preset option
     * Support external local storage
-    * More incoming...
+    * More to come...
 
-*  **Requirements :** 
+*  **Requirements:**
     * FFmpeg
 
-*  **Note :** 
+*  **Note:**
     * Does not currently support conversion with encryption enabled
     * More formats will be added soon
 
@@ -34,3 +34,4 @@
         <nextcloud min-version="13" max-version="19"/>
     </dependencies>
 </info>
+

@@ -20,11 +20,14 @@ class ConversionController extends Controller {
 		$this->config = $config;
 		$this->UserId = $UserId;
 	}
-	/**
-	* @NoAdminRequired
-	*/
-	public function getExternalMP(){
-		$mounts = \OC_Mount_Config::getAbsoluteMountPoints($this->UserId);
+
+	protected function getExternalMP(){
+		$version = \OC::$server->getConfig()->getSystemValue('version');
+		if((int)substr($version, 0, 2) >= 20){
+			$mounts = \OCA\Files_External\MountConfig::getAbsoluteMountPoints($this->UserId);
+		}else{
+			$mounts = \OC_Mount_Config::getAbsoluteMountPoints($this->UserId);
+		}
 		$externalMountPoints = array();
 		foreach($mounts as $mount){
 			if ($mount["class"] == "local"){
@@ -36,7 +39,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $scale = null, $override = false, $shareOwner = null, $mtime = 0) {
+	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $scale = null, $shareOwner = null, $mtime = 0) {
 		if (preg_match('/(\/|^)\.\.(\/|$)/', $nameOfFile)) {
 			$response = ['code' => 0, 'desc' => 'Can\'t find file'];
 			return json_encode($response);
@@ -62,9 +65,6 @@ class ConversionController extends Controller {
 							DEBUG(".$return."): ".$url.'/'.$dircpt.'/'.$nameOfFile.' - '.$output));
 							return json_encode($response);
 						}else{
-							if ($override == "true"){
-								unlink($url.'/'.$directory.'/'.$nameOfFile);
-							}
 							$response = array_merge($response, array("code" => 1));
 							return json_encode($response);
 						}

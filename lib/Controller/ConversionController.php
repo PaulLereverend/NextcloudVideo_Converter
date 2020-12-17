@@ -87,12 +87,13 @@ class ConversionController extends Controller {
 			if ($shareOwner != null){
 				$this->UserId = $shareOwner;
 			}
-			if (file_exists($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile)){
-				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate, $scale);
-				exec($cmd, $output,$return);
+			$pathOfFile = $this->getPathOfFile($directory, $nameOfFile);
+			if (file_exists($pathOfFile."/".$nameOfFile)) {
+				$cmd = $this->createCmd($pathOfFile."/",$nameOfFile,$preset,$type, $priority, $codec, $vbitrate, $scale);
+				exec($cmd, $output, $return);
 				if($return == 127){
 					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
-					 DEBUG(".$return."): ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile.' - '.$output));
+					 DEBUG(".$return."): "." - ".$pathOfFile.'/'.$nameOfFile.' - '.$output));
 					return json_encode($response);
 				}
 				$scan = self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type, $this->UserId);
@@ -102,10 +103,43 @@ class ConversionController extends Controller {
 				$response = array_merge($response, array("code" => 1));
 				return json_encode($response);
 			}else{
-				$response = array_merge($response, array("code" => 0, "desc" => "Can't find video at ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile));
+				$response = array_merge($response, array("code" => 0, "desc" => "Can't find video at ".$pathOfFile."/".$nameOfFile));
 				return json_encode($response);
 			}
 		}
+	}
+	/**
+	 * Accepts the friendly directory name and returns the path of the file
+	 * on disk.
+	 */
+	private function getPathOfFile($directory, $nameOfFile) {
+		$data_directory = $this->config->getSystemValue('datadirectory', '');
+		$abs_filename = $data_directory.'/'.$this->UserId.'/files'.$directory;
+		// First, we look for the file in the normal location
+		if (file_exists($abs_filename."/".$nameOfFile)) {
+			return $abs_filename;
+		}
+		// If that isn't found, check for group folders if enabled
+		if ($this->config->getAppValue("groupfolders", "enabled")) {
+			// We will need to look up the folder name and get the ID
+			$fm = new \OCA\GroupFolders\Folder\FolderManager(\OC::$server->getDatabaseConnection());
+			$all_folders = $fm->getAllFolders();
+			$directory_array = explode("/", $directory);
+			$group_id = NULL;
+			foreach ($all_folders as $entry) {
+				if ($entry["mount_point"] == $directory_array[1])
+					$group_id = $entry["id"];
+			}
+			// If we found the folder, the group_id will be an integer
+			// This check also serves as a directory traversal contol,
+			// in the event that groupfolders were to change their API
+			// to use strings as group identifiers
+			if (gettype($group_id) == "integer") {
+				$dir_without_group_folder = implode("/", array_slice($directory_array, 2));
+				return implode("/", [$data_directory, "__groupfolders", $group_id, $dir_without_group_folder]);
+			}
+		}
+		return null;
 	}
 	/**
 	* @NoAdminRequired

@@ -31,12 +31,19 @@ class ConversionController extends Controller {
 		if (file_exists($file)){
 			$cmd = $this->createCmd($file,$preset,$type, $priority, $codec, $vbitrate, $scale);
 			exec($cmd, $output,$return);
+			// if the file is un external storage
 			if($external){
+				//put the temporary file in the external storage
 				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename'].".".$type));
-				unlink(dirname($file) . '/' . pathinfo($file)['filename'].".".$type);
+				// check that the temporary file is not the same as the new file
+				if(Filesystem::getLocalFile($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type) != dirname($file) . '/' . pathinfo($file)['filename'].".".$type){
+					unlink(dirname($file) . '/' . pathinfo($file)['filename'].".".$type);
+				}
 			}else{
+				//create the new file in the NC filesystem
 				Filesystem::touch($directory . '/' . pathinfo($file)['filename'].".".$type);
 			}
+			//if ffmpeg is throwing an error
 			if($return == 127){
 				$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
 				DEBUG(".$return."): " . $file . ' - '.$output));

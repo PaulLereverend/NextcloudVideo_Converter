@@ -7,110 +7,60 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 use \OCP\IConfig;
 use OCP\EventDispatcher\IEventDispatcher;
+use OC\Files\Filesystem;
 
 
 class ConversionController extends Controller {
-	private $config;
-	private $UserId;
 	/**
 	* @NoAdminRequired
 	*/
-	public function __construct(IConfig $config, $AppName, IRequest $request, string $UserId){
+	public function __construct($AppName, IRequest $request){
 		parent::__construct($AppName, $request);
-		$this->config = $config;
-		$this->UserId = $UserId;
 	}
 
-	protected function getExternalMP(){
-		$version = \OC::$server->getConfig()->getSystemValue('version');
-		if((int)substr($version, 0, 2) >= 20){
-			$mounts = \OCA\Files_External\MountConfig::getAbsoluteMountPoints($this->UserId);
-		}else{
-			$mounts = \OC_Mount_Config::getAbsoluteMountPoints($this->UserId);
-		}
-		$externalMountPoints = array();
-		foreach($mounts as $mount){
-			if ($mount["class"] == "local"){
-				$externalMountPoints[$mount["mountpoint"]] = $mount["options"]["datadir"];
-			}
-		}
-		return $externalMountPoints;
+	public function getFile($directory, $fileName){
+		return Filesystem::getLocalFile($directory . '/' . $fileName);
 	}
 	/**
 	* @NoAdminRequired
 	*/
 	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $codec = null, $vbitrate = null, $scale = null, $shareOwner = null, $mtime = 0) {
-		if (preg_match('/(\/|^)\.\.(\/|$)/', $nameOfFile)) {
-			$response = ['code' => 0, 'desc' => 'Can\'t find file'];
-			return json_encode($response);
-		 }
-		 if (preg_match('/(\/|^)\.\.(\/|$)/', $directory)) {
-			$response = ['code' => 0, 'desc' => 'Can\'t open file at directory'];
-			return json_encode($response);
-		 }
+		$file = $this->getFile($directory, $nameOfFile);
+		$dir = dirname($file);
 		$response = array();
-		if ($external){
-			$externalUrl = $this->getExternalMP();
-			$desc = "";
-			$dircpt = substr($directory, 1);
-			while ($dircpt != ""){
-				if (array_key_exists($dircpt, $externalUrl)){
-					$url = $externalUrl[$dircpt];
-					$dircpt = str_replace($dircpt, "", $directory);
-					if (file_exists($url.'/'.$dircpt.'/'.$nameOfFile)){
-						$cmd = $this->createCmd($url.'/'.$dircpt.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate, $scale);
-						exec($cmd, $output,$return);
-						if($return == 127){
-							$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
-							DEBUG(".$return."): ".$url.'/'.$dircpt.'/'.$nameOfFile.' - '.$output));
-							return json_encode($response);
-						}else{
-							$response = array_merge($response, array("code" => 1));
-							return json_encode($response);
-						}
-					}else{
-						$response = array_merge($response, array("code" => 0, "desc" => "Can't find video on external local storage : ".$url.'/'.$dircpt.'/'.$nameOfFile));
-						return json_encode($response);
-					}
-				}else{
-					$pos = strrpos( $dircpt, '/');
-					if ($pos == false){
-						$dircpt = "/";
-					}else{
-						$dircpt= substr($dircpt, 0, $pos);
-					}
+		if (file_exists($file)){
+			$cmd = $this->createCmd($file,$preset,$type, $priority, $codec, $vbitrate, $scale);
+			exec($cmd, $output,$return);
+			// if the file is un external storage
+			if($external){
+				//put the temporary file in the external storage
+				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename'].".".$type));
+				// check that the temporary file is not the same as the new file
+				if(Filesystem::getLocalFile($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type) != dirname($file) . '/' . pathinfo($file)['filename'].".".$type){
+					unlink(dirname($file) . '/' . pathinfo($file)['filename'].".".$type);
 				}
+			}else{
+				//create the new file in the NC filesystem
+				Filesystem::touch($directory . '/' . pathinfo($file)['filename'].".".$type);
 			}
-			$response = array_merge($response, array("code" => 0, "desc" => "Can't find video on external local storage"));
-			return json_encode($response);
-		}else{
-			if ($shareOwner != null){
-				$this->UserId = $shareOwner;
-			}
-			if (file_exists($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile)){
-				$cmd = $this->createCmd($this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/',$nameOfFile,$preset,$type, $priority, $codec, $vbitrate, $scale);
-				exec($cmd, $output,$return);
-				if($return == 127){
-					$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
-					 DEBUG(".$return."): ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile.' - '.$output));
-					return json_encode($response);
-				}
-				$scan = self::scanFolder('/'.$this->UserId.'/files'.$directory.'/'.pathinfo($nameOfFile)['filename'].'.'.$type, $this->UserId);
-				if($scan != 1){
-					return $scan;
-				}
-				$response = array_merge($response, array("code" => 1));
+			//if ffmpeg is throwing an error
+			if($return == 127){
+				$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
+				DEBUG(".$return."): " . $file . ' - '.$output));
 				return json_encode($response);
 			}else{
-				$response = array_merge($response, array("code" => 0, "desc" => "Can't find video at ".$this->config->getSystemValue('datadirectory', '').'/'.$this->UserId.'/files'.$directory.'/'.$nameOfFile));
+				$response = array_merge($response, array("code" => 1));
 				return json_encode($response);
 			}
+		}else{
+			$response = array_merge($response, array("code" => 0, "desc" => "Can't find file at ". $file));
+			return json_encode($response);
 		}
 	}
 	/**
 	* @NoAdminRequired
 	*/
-	public function createCmd($link,$filename,$preset,$output, $priority, $codec, $vbitrate, $scale){
+	public function createCmd($file,$preset,$output, $priority, $codec, $vbitrate, $scale){
 		$middleArgs = "";
 		if ($output == "webm"){
 			switch ($preset) {
@@ -202,39 +152,10 @@ class ConversionController extends Controller {
                         }
 		}
 		//echo $link;
-		$cmd = " ffmpeg -y -i ".escapeshellarg($link.$filename)." ".$middleArgs." ".escapeshellarg($link.pathinfo($filename)['filename'].".".$output);
+		$cmd = " ffmpeg -y -i ".escapeshellarg($file)." ".$middleArgs." ".escapeshellarg(dirname($file) . '/' . pathinfo($file)['filename'].".".$output);
 		if ($priority != "0"){
 			$cmd = "nice -n ".escapeshellarg($priority).$cmd;
 		}
 		return $cmd;
-	}
-	/**
-	* @NoAdminRequired
-	*/
-	public function scanFolder($path, $user)
-    {
-		$response = array();
-		/*if($user == null){
-			$user = \OC::$server->getUserSession()->getUser()->getUID();
-		}*/
-		$version = \OC::$server->getConfig()->getSystemValue('version');
-		 if((int)substr($version, 0, 2) < 18){
-			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
-		 }else{
-			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(),\OC::$server->query(IEventDispatcher::class), \OC::$server->getLogger());
-		 }
-		try {
-            $scanner->scan($path, $recusive = false);
-        } catch (ForbiddenException $e) {
-			$response = array_merge($response, array("code" => 0, "desc" => $e->getTraceAsString()));
-			return json_encode($response);
-        }catch (NotFoundException $e){
-			$response = array_merge($response, array("code" => 0, "desc" => $this->l->t("Can't scan file at ").$path));
-			return json_encode($response);
-		}catch (\Exception $e){
-			$response = array_merge($response, array("code" => 0, "desc" => $e->getTraceAsString()));
-			return json_encode($response);
-		}
-		return 1;
 	}
 }

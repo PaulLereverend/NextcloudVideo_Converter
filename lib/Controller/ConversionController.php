@@ -11,31 +11,11 @@ use OC\Files\Filesystem;
 
 
 class ConversionController extends Controller {
-	private $config;
-	private $UserId;
 	/**
 	* @NoAdminRequired
 	*/
-	public function __construct(IConfig $config, $AppName, IRequest $request, string $UserId){
+	public function __construct($AppName, IRequest $request){
 		parent::__construct($AppName, $request);
-		$this->config = $config;
-		$this->UserId = $UserId;
-	}
-
-	protected function getExternalMP(){
-		$version = \OC::$server->getConfig()->getSystemValue('version');
-		if((int)substr($version, 0, 2) >= 20){
-			$mounts = \OCA\Files_External\MountConfig::getAbsoluteMountPoints($this->UserId);
-		}else{
-			$mounts = \OC_Mount_Config::getAbsoluteMountPoints($this->UserId);
-		}
-		$externalMountPoints = array();
-		foreach($mounts as $mount){
-			if ($mount["class"] == "local"){
-				$externalMountPoints[$mount["mountpoint"]] = $mount["options"]["datadir"];
-			}
-		}
-		return $externalMountPoints;
 	}
 
 	public function getFile($directory, $fileName){
@@ -165,34 +145,5 @@ class ConversionController extends Controller {
 			$cmd = "nice -n ".escapeshellarg($priority).$cmd;
 		}
 		return $cmd;
-	}
-	/**
-	* @NoAdminRequired
-	*/
-	public function scanFolder($path, $user)
-    {
-		$response = array();
-		/*if($user == null){
-			$user = \OC::$server->getUserSession()->getUser()->getUID();
-		}*/
-		$version = \OC::$server->getConfig()->getSystemValue('version');
-		 if((int)substr($version, 0, 2) < 18){
-			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(), \OC::$server->getLogger());
-		 }else{
-			$scanner = new \OC\Files\Utils\Scanner($user, \OC::$server->getDatabaseConnection(),\OC::$server->query(IEventDispatcher::class), \OC::$server->getLogger());
-		 }
-		try {
-            $scanner->scan($path, $recusive = false);
-        } catch (ForbiddenException $e) {
-			$response = array_merge($response, array("code" => 0, "desc" => $e->getTraceAsString()));
-			return json_encode($response);
-        }catch (NotFoundException $e){
-			$response = array_merge($response, array("code" => 0, "desc" => $this->l->t("Can't scan file at ").$path));
-			return json_encode($response);
-		}catch (\Exception $e){
-			$response = array_merge($response, array("code" => 0, "desc" => $e->getTraceAsString()));
-			return json_encode($response);
-		}
-		return 1;
 	}
 }

@@ -1,3 +1,14 @@
+## 1.0.0
+
+- Better handling of files
+- Improved performances
+- Support group folders
+- Support all external storage methods
+
+## 0.1.5
+
+- Support for NC 20
+
 ## 0.1.4
 
 - Support for NC 19

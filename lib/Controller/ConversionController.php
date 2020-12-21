@@ -31,7 +31,12 @@ class ConversionController extends Controller {
 		if (file_exists($file)){
 			$cmd = $this->createCmd($file,$preset,$type, $priority, $codec, $vbitrate, $scale);
 			exec($cmd, $output,$return);
-			Filesystem::touch($directory . '/' . pathinfo($file)['filename'].".".$type);
+			if($external){
+				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename'].".".$type));
+				unlink(dirname($file) . '/' . pathinfo($file)['filename'].".".$type);
+			}else{
+				Filesystem::touch($directory . '/' . pathinfo($file)['filename'].".".$type);
+			}
 			if($return == 127){
 				$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
 				DEBUG(".$return."): " . $file . ' - '.$output));

@@ -1,3 +1,7 @@
+## 1.0.1
+
+- Support for NC 21
+
 ## 1.0.0
 
 - Better handling of files

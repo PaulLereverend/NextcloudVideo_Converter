@@ -11,14 +11,21 @@ use OC\Files\Filesystem;
 
 
 class ConversionController extends Controller {
+
+	private $userId;
+
 	/**
 	* @NoAdminRequired
 	*/
-	public function __construct($AppName, IRequest $request){
+	public function __construct($AppName, IRequest $request, $UserId){
 		parent::__construct($AppName, $request);
+		$this->userId = $UserId;
+
 	}
 
 	public function getFile($directory, $fileName){
+		\OC_Util::tearDownFS();
+		\OC_Util::setupFS($this->userId);
 		return Filesystem::getLocalFile($directory . '/' . $fileName);
 	}
 	/**

@@ -8,6 +8,16 @@
 	margin-top: 10px;
 	padding-top: 0px !important;
 }
+.checkbox-container {
+  display: flex;
+  align-items: center;
+}
+.checkbox-container > input {
+  margin-left: 4px;
+}
+.vc-label {
+  min-width: 4em;
+}
 .sk-circle {
 	margin: auto;
 	width: 40px;
@@ -109,7 +119,7 @@
   .sk-circle .sk-circle12:before {
 	-webkit-animation-delay: -0.1s;
 			animation-delay: -0.1s; }
-  
+
   @-webkit-keyframes sk-circleBounceDelay {
 	0%, 80%, 100% {
 	  -webkit-transform: scale(0);
@@ -119,7 +129,7 @@
 			  transform: scale(1);
 	}
   }
-  
+
   @keyframes sk-circleBounceDelay {
 	0%, 80%, 100% {
 	  -webkit-transform: scale(0);

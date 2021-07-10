@@ -1,6 +1,8 @@
 ## 1.0.2
 
 - Support for NC 22
+- Add more resolutions (thanks @CWBudde)
+- Add faststart movflag for pseudo streaming (thanks @CWBudde)
 
 ## 1.0.1
 

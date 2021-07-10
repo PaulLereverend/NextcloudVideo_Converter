@@ -1,3 +1,7 @@
+## 1.0.2
+
+- Support for NC 22
+
 ## 1.0.1
 
 - Support for NC 21

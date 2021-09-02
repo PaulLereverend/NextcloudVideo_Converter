@@ -21,6 +21,7 @@ $(document).ready(function () {
                     var vcodec = null;
                     var vbitrate = null;
                     var scaling = null;
+                    var faststart = true;
                     $('body').append(
                         '<div id="linkeditor_overlay" class="oc-dialog-dim"></div>'
                         + '<div id="linkeditor_container" class="oc-dialog" style="position: fixed;">'

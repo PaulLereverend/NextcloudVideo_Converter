@@ -1,6 +1,6 @@
 <?php
 /**
- * Load Javascrip
+ * Load Javascript
  */
 use OCP\Util;
 $eventDispatcher = \OC::$server->getEventDispatcher();

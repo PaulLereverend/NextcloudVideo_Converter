@@ -30,7 +30,7 @@
     <website>https://github.com/PaulLereverend/NextcloudVideo_Converter</website>
     <bugs>https://github.com/PaulLereverend/NextcloudVideo_Converter</bugs>
     <dependencies>
-        <nextcloud min-version="13" max-version="22"/>
+        <nextcloud min-version="13" max-version="23"/>
     </dependencies>
 </info>
 

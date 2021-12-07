@@ -1,3 +1,6 @@
+## 1.0.2
+
+- Support for NC 23
 ## 1.0.3
 
 - Fixed "faststart is not defined"

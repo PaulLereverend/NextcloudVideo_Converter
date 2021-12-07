@@ -38,8 +38,8 @@ class ConversionController extends Controller {
 		if (file_exists($file)){
 			$cmd = $this->createCmd($file, $preset, $type, $priority, $movflags, $codec, $vbitrate, $scale);
 			exec($cmd, $output,$return);
-			// if the file is un external storage
-			if($external){
+			// if the file is in external storage, and also check if encryption is enabled
+			if($external || \OC::$server->getEncryptionManager()->isEnabled()){
 				//put the temporary file in the external storage
 				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename'].".".$type));
 				// check that the temporary file is not the same as the new file

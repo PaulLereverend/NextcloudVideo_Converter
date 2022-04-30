@@ -174,6 +174,11 @@ class ConversionController extends Controller {
 			}
 		}
 		//echo $link;
+		// I put this here because the code up there seems to be chained in a string builder and I didn't want to disrupt the code too much.
+		// This is useful if you just want to change containers types, and do no work with codecs. So you can convert an MKV to MP4 almost instantly.
+		if($codec == "copy"){
+			$middleArgs = "-codec copy";
+		}
 		$cmd = " ffmpeg -y -i ".escapeshellarg($file)." ".$middleArgs." ".escapeshellarg(dirname($file) . '/' . pathinfo($file)['filename'].".".$output);
 		if ($priority != "0"){
 			$cmd = "nice -n ".escapeshellarg($priority).$cmd;

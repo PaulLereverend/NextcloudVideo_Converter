@@ -73,6 +73,7 @@ $(document).ready(function () {
                         + '<option value="none">Auto</option>'
                         + '<option value="x264">H264</option>'
                         + '<option value="x265">HEVC</option>'
+                        + '<option value="copy">Copy</option>'
                         + '</select>'
                         + '<p class="vc-label urldisplay" id="labelBitrate" style="display:inline-block; margin-right:5px;">'
                         + 'Target bitrate'

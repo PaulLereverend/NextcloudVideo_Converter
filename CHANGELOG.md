@@ -1,6 +1,7 @@
 ## 1.0.5
 
 - Support for NC 24
+- Support copy codec
 ## 1.0.4
 
 - Support for NC 23

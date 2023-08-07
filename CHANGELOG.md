@@ -1,3 +1,8 @@
+## 1.0.6-fix-issue-56
+
+- Fix convert to same format (e.g. .mp4 to .mp4)
+[issues/56](https://github.com/PaulLereverend/NextcloudVideo_Converter/issues/56)
+
 ## 1.0.6
 
 - Support for NC 27

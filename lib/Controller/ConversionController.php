@@ -41,14 +41,14 @@ class ConversionController extends Controller {
 			// if the file is in external storage, and also check if encryption is enabled
 			if($external || \OC::$server->getEncryptionManager()->isEnabled()){
 				//put the temporary file in the external storage
-				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename'].".".$type));
+				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename']."_converted.".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type));
 				// check that the temporary file is not the same as the new file
-				if(Filesystem::getLocalFile($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type) != dirname($file) . '/' . pathinfo($file)['filename'].".".$type){
-					unlink(dirname($file) . '/' . pathinfo($file)['filename'].".".$type);
+				if(Filesystem::getLocalFile($directory . '/' . pathinfo($nameOfFile)['filename']."_converted.".$type) != dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type){
+					unlink(dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type);
 				}
 			}else{
 				//create the new file in the NC filesystem
-				Filesystem::touch($directory . '/' . pathinfo($file)['filename'].".".$type);
+				Filesystem::touch($directory . '/' . pathinfo($file)['filename']."_converted.".$type);
 			}
 			//if ffmpeg is throwing an error
 			if($return == 127){
@@ -179,7 +179,7 @@ class ConversionController extends Controller {
 		if($codec == "copy"){
 			$middleArgs = "-codec copy";
 		}
-		$cmd = " ffmpeg -y -i ".escapeshellarg($file)." ".$middleArgs." ".escapeshellarg(dirname($file) . '/' . pathinfo($file)['filename'].".".$output);
+		$cmd = " ffmpeg -y -i ".escapeshellarg($file)." ".$middleArgs." ".escapeshellarg(dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$output);
 		if ($priority != "0"){
 			$cmd = "nice -n ".escapeshellarg($priority).$cmd;
 		}

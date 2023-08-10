@@ -19,6 +19,7 @@ $(document).ready(function () {
                     var priority = "0";
                     var title = "Titre";
                     var vcodec = null;
+					var acodec = null;
                     var vbitrate = null;
                     var scaling = null;
                     var faststart = true;
@@ -66,7 +67,7 @@ $(document).ready(function () {
                         + '<option value="10" selected>Low</option>'
                         + '</select>'
                         + '<br>'
-                        + '<p class="vc-label urldisplay" id="labelCodec" style="display:inline-block; margin-right:5px;">'
+                        + '<p class="vc-label urldisplay" id="labelCodecV" style="display:inline-block; margin-right:5px;">'
                         + 'Codec'
                         + '</p>'
                         + '<select id="vcodec" style="margin-bottom: 10px;">'
@@ -91,6 +92,15 @@ $(document).ready(function () {
                         + '<p class="vc-label urldisplay" id="labelBitrateUnit" style="display:inline-block; margin-right:5px;">'
                         + 'kbit/s'
                         + '</p>'
+                        + '<br>'
+                        + '<p class="vc-label urldisplay" id="labelCodecA" style="display:inline-block; margin-right:5px;">'
+                        + 'Codec Audio'
+                        + '</p>'
+                        + '<select id="acodec" style="margin-bottom: 10px;">'
+                        + '<option value="none">Auto</option>'
+                        + '<option value="aac">AAC</option>'
+                        + '<option value="an">No audio</option>'
+                        + '</select>'						
                         + '<br>'
                         + '<p class="vc-label urldisplay" id="labelScale" style="display:inline-block; margin-right:5px;">'
                         + 'Scale to'
@@ -143,6 +153,13 @@ $(document).ready(function () {
                             vcodec = null;
                         }
                     });
+					document.getElementById("acodec").addEventListener("change", function (element) {
+                        console.log(element.srcElement.value);
+                        acodec = element.srcElement.value;
+                        if (acodec === "none") {
+                            acodec = null;
+                        }
+                    });
                     document.getElementById("vbitrate").addEventListener("change", function (element) {
                         vbitrate = element.srcElement.value;
                         if (vbitrate === "none") {
@@ -176,6 +193,7 @@ $(document).ready(function () {
 									priority: priority,
 									movflags: faststart,
 									codec: vcodec,
+									acodec: acodec,
 									vbitrate: vbitrate,
 									scale: scaling,
 									mtime: context.fileInfoModel.attributes.mtime,
@@ -190,6 +208,7 @@ $(document).ready(function () {
 									priority: priority,
 									movflags: faststart,
 									codec: vcodec,
+									acodec: acodec,
 									vbitrate: vbitrate,
 									scale: scaling,
 									shareOwner: context.fileList.dirInfo.shareOwnerId,
@@ -209,11 +228,13 @@ $(document).ready(function () {
 									document.getElementById("text").style.display = "none";
 									document.getElementById("preset").style.display = "none";
 									document.getElementById("vcodec").style.display = "none";
+									document.getElementById("acodec").style.display = "none";
 									document.getElementById("vbitrate").style.display = "none";
 									document.getElementById("scale").style.display = "none";
 									document.getElementById("labelPreset").style.display = "none";
 									document.getElementById("labelScale").style.display = "none";
-									document.getElementById("labelCodec").style.display = "none";
+									document.getElementById("labelCodecV").style.display = "none";
+									document.getElementById("labelCodecA").style.display = "none";
 									document.getElementById("labelBitrate").style.display = "none";
 									document.getElementById("labelBitrateUnit").style.display = "none";
 									document.getElementById("labelPriority").style.display = "none";

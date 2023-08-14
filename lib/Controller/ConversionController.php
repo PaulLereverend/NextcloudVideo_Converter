@@ -31,29 +31,32 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $movflags = false, $codec = null, $vbitrate = null, $scale = null, $shareOwner = null, $mtime = 0) {
+	public function convertHere($nameOfFile, $directory, $external, $type, $preset, $priority, $movflags = false, $codec = null, $acodec = null, $vbitrate = null, $scale = null, $shareOwner = null, $mtime = 0) {
 		$file = $this->getFile($directory, $nameOfFile);
 		$dir = dirname($file);
 		$response = array();
 		if (file_exists($file)){
-			$cmd = $this->createCmd($file, $preset, $type, $priority, $movflags, $codec, $vbitrate, $scale);
+			$cmd = $this->createCmd($file, $preset, $type, $priority, $movflags, $codec, $acodec, $vbitrate, $scale);
 			exec($cmd, $output,$return);
 			// if the file is in external storage, and also check if encryption is enabled
 			if($external || \OC::$server->getEncryptionManager()->isEnabled()){
 				//put the temporary file in the external storage
-				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename'].".".$type));
+				Filesystem::file_put_contents($directory . '/' . pathinfo($nameOfFile)['filename']."_converted.".$type, file_get_contents(dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type));
 				// check that the temporary file is not the same as the new file
-				if(Filesystem::getLocalFile($directory . '/' . pathinfo($nameOfFile)['filename'].".".$type) != dirname($file) . '/' . pathinfo($file)['filename'].".".$type){
-					unlink(dirname($file) . '/' . pathinfo($file)['filename'].".".$type);
+				if(Filesystem::getLocalFile($directory . '/' . pathinfo($nameOfFile)['filename']."_converted.".$type) != dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type){
+					unlink(dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type);
 				}
 			}else{
 				//create the new file in the NC filesystem
-				Filesystem::touch($directory . '/' . pathinfo($file)['filename'].".".$type);
+				Filesystem::touch($directory . '/' . pathinfo($file)['filename']."_converted.".$type);
 			}
 			//if ffmpeg is throwing an error
-			if($return == 127){
-				$response = array_merge($response, array("code" => 0, "desc" => "ffmpeg is not installed or available \n
-				DEBUG(".$return."): " . $file . ' - '.$output));
+			$converted_file_to_check = dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$type;
+			if (($return == 127) || (!file_exists($converted_file_to_check)) || (filesize($converted_file_to_check) == 0)) {
+				$response = array_merge($response, array("code" => 0, "desc" => "Convert failed (ffmpeg code = $return)" ));
+				if (file_exists($converted_file_to_check)) {
+					unlink($converted_file_to_check);
+				}
 				return json_encode($response);
 			}else{
 				$response = array_merge($response, array("code" => 1));
@@ -67,7 +70,7 @@ class ConversionController extends Controller {
 	/**
 	* @NoAdminRequired
 	*/
-	public function createCmd($file, $preset, $output, $priority, $movflags, $codec, $vbitrate, $scale){
+	public function createCmd($file, $preset, $output, $priority, $movflags, $codec, $acodec, $vbitrate, $scale){
 		$middleArgs = "";
 		if ($output == "webm"){
 			switch ($preset) {
@@ -98,6 +101,17 @@ class ConversionController extends Controller {
 				}
 			} else {
 				$middleArgs = "-preset ".escapeshellarg($preset). " -strict -2";
+			}
+			
+			if ($acodec != null){
+				switch ($acodec) {
+					case 'aac':
+						$middleArgs = " -acodec aac";
+						break;
+					case 'an':
+						$middleArgs = " -an";
+						break;
+				}
 			}
 
 			if ($movflags) {
@@ -179,7 +193,7 @@ class ConversionController extends Controller {
 		if($codec == "copy"){
 			$middleArgs = "-codec copy";
 		}
-		$cmd = " ffmpeg -y -i ".escapeshellarg($file)." ".$middleArgs." ".escapeshellarg(dirname($file) . '/' . pathinfo($file)['filename'].".".$output);
+		$cmd = " ffmpeg -y -i ".escapeshellarg($file)." ".$middleArgs." ".escapeshellarg(dirname($file) . '/' . pathinfo($file)['filename']."_converted.".$output);
 		if ($priority != "0"){
 			$cmd = "nice -n ".escapeshellarg($priority).$cmd;
 		}

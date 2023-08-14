@@ -19,6 +19,7 @@ $(document).ready(function () {
                     var priority = "0";
                     var title = "Titre";
                     var vcodec = null;
+					var acodec = null;
                     var vbitrate = null;
                     var scaling = null;
                     var faststart = true;
@@ -66,7 +67,7 @@ $(document).ready(function () {
                         + '<option value="10" selected>Low</option>'
                         + '</select>'
                         + '<br>'
-                        + '<p class="vc-label urldisplay" id="labelCodec" style="display:inline-block; margin-right:5px;">'
+                        + '<p class="vc-label urldisplay" id="labelCodecV" style="display:inline-block; margin-right:5px;">'
                         + 'Codec'
                         + '</p>'
                         + '<select id="vcodec" style="margin-bottom: 10px;">'
@@ -91,6 +92,15 @@ $(document).ready(function () {
                         + '<p class="vc-label urldisplay" id="labelBitrateUnit" style="display:inline-block; margin-right:5px;">'
                         + 'kbit/s'
                         + '</p>'
+                        + '<br>'
+                        + '<p class="vc-label urldisplay" id="labelCodecA" style="display:inline-block; margin-right:5px;">'
+                        + 'Codec Audio'
+                        + '</p>'
+                        + '<select id="acodec" style="margin-bottom: 10px;">'
+                        + '<option value="none">Auto</option>'
+                        + '<option value="aac">AAC</option>'
+                        + '<option value="an">No audio</option>'
+                        + '</select>'						
                         + '<br>'
                         + '<p class="vc-label urldisplay" id="labelScale" style="display:inline-block; margin-right:5px;">'
                         + 'Scale to'
@@ -143,6 +153,13 @@ $(document).ready(function () {
                             vcodec = null;
                         }
                     });
+					document.getElementById("acodec").addEventListener("change", function (element) {
+                        console.log(element.srcElement.value);
+                        acodec = element.srcElement.value;
+                        if (acodec === "none") {
+                            acodec = null;
+                        }
+                    });
                     document.getElementById("vbitrate").addEventListener("change", function (element) {
                         vbitrate = element.srcElement.value;
                         if (vbitrate === "none") {
@@ -165,86 +182,85 @@ $(document).ready(function () {
                     var fileExt = filename.split('.').pop();
                     var types = ['avi', 'mp4', 'm4v', 'webm'];
                     types.forEach(type => {
-                        if (type == fileExt) {
-                            document.getElementById(type).setAttribute('style', 'background-color: lightgray; border-color:lightgray;');
-                        } else {
-                            document.getElementById(type).addEventListener("click", function ($element) {
-                                if (context.fileInfoModel.attributes.mountType == "external") {
-                                    var data = {
-                                        nameOfFile: filename,
-                                        directory: context.dir,
-                                        external: 1,
-                                        type: $element.target.id,
-                                        preset: preset,
-                                        priority: priority,
-                                        movflags: faststart,
-                                        codec: vcodec,
-                                        vbitrate: vbitrate,
-                                        scale: scaling,
-                                        mtime: context.fileInfoModel.attributes.mtime,
-                                    };
-                                } else {
-                                    var data = {
-                                        nameOfFile: filename,
-                                        directory: context.dir,
-                                        external: 0,
-                                        type: $element.target.id,
-                                        preset: preset,
-                                        priority: priority,
-                                        movflags: faststart,
-                                        codec: vcodec,
-                                        vbitrate: vbitrate,
-                                        scale: scaling,
-                                        shareOwner: context.fileList.dirInfo.shareOwnerId,
-                                    };
-                                }
-                                var tr = context.fileList.findFileEl(filename);
-                                context.fileList.showFileBusyState(tr, true);
-                                $.ajax({
-                                    type: "POST",
-                                    async: "true",
-                                    url: OC.filePath('video_converter', 'ajax', 'convertHere.php'),
-                                    data: data,
-                                    beforeSend: function () {
-                                        document.getElementById("loading").style.display = "block";
-                                        document.getElementById("noteLoading").style.display = "block";
-                                        document.getElementById("params").style.display = "none";
-                                        document.getElementById("text").style.display = "none";
-                                        document.getElementById("preset").style.display = "none";
-                                        document.getElementById("vcodec").style.display = "none";
-                                        document.getElementById("vbitrate").style.display = "none";
-                                        document.getElementById("scale").style.display = "none";
-                                        document.getElementById("labelPreset").style.display = "none";
-                                        document.getElementById("labelScale").style.display = "none";
-                                        document.getElementById("labelCodec").style.display = "none";
-                                        document.getElementById("labelBitrate").style.display = "none";
-                                        document.getElementById("labelBitrateUnit").style.display = "none";
-                                        document.getElementById("labelPriority").style.display = "none";
-                                        document.getElementById("movflags").style.display = "none";
-                                        document.getElementById("note").style.display = "none";
-                                        document.getElementById("buttons").setAttribute('style', 'display: none !important');
-                                    },
-                                    success: function (element) {
-                                        element = element.replace(/null/g, '');
-                                        console.log(element);
-                                        response = JSON.parse(element);
-                                        if (response.code == 1) {
-                                            this.filesClient = OC.Files.getClient();
-                                            close();
-                                            context.fileList.reload();
-                                        } else {
-                                            context.fileList.showFileBusyState(tr, false);
-                                            close();
-                                            OC.dialogs.alert(
-                                                t('video_converter', response.desc),
-                                                t('video_converter', 'Error converting ' + filename)
-                                            );
-                                        }
-                                    }
-                                });
-                            });
-                        }
-
+						document.getElementById(type).addEventListener("click", function ($element) {
+							if (context.fileInfoModel.attributes.mountType == "external") {
+								var data = {
+									nameOfFile: filename,
+									directory: context.dir,
+									external: 1,
+									type: $element.target.id,
+									preset: preset,
+									priority: priority,
+									movflags: faststart,
+									codec: vcodec,
+									acodec: acodec,
+									vbitrate: vbitrate,
+									scale: scaling,
+									mtime: context.fileInfoModel.attributes.mtime,
+								};
+							} else {
+								var data = {
+									nameOfFile: filename,
+									directory: context.dir,
+									external: 0,
+									type: $element.target.id,
+									preset: preset,
+									priority: priority,
+									movflags: faststart,
+									codec: vcodec,
+									acodec: acodec,
+									vbitrate: vbitrate,
+									scale: scaling,
+									shareOwner: context.fileList.dirInfo.shareOwnerId,
+								};
+							}
+							var tr = context.fileList.findFileEl(filename);
+							context.fileList.showFileBusyState(tr, true);
+							$.ajax({
+								type: "POST",
+								async: "true",
+								url: OC.filePath('video_converter', 'ajax', 'convertHere.php'),
+								data: data,
+								beforeSend: function () {
+									document.getElementById("loading").style.display = "block";
+									document.getElementById("noteLoading").style.display = "block";
+									document.getElementById("params").style.display = "none";
+									document.getElementById("text").style.display = "none";
+									document.getElementById("preset").style.display = "none";
+									document.getElementById("vcodec").style.display = "none";
+									document.getElementById("acodec").style.display = "none";
+									document.getElementById("vbitrate").style.display = "none";
+									document.getElementById("scale").style.display = "none";
+									document.getElementById("labelPreset").style.display = "none";
+									document.getElementById("labelScale").style.display = "none";
+									document.getElementById("labelCodecV").style.display = "none";
+									document.getElementById("labelCodecA").style.display = "none";
+									document.getElementById("labelBitrate").style.display = "none";
+									document.getElementById("labelBitrateUnit").style.display = "none";
+									document.getElementById("labelPriority").style.display = "none";
+									document.getElementById("movflags").style.display = "none";
+									document.getElementById("note").style.display = "none";
+									document.getElementById("buttons").setAttribute('style', 'display: none !important');
+								},
+								success: function (element) {
+									element = element.replace(/null/g, '');
+									console.log(element);
+									response = JSON.parse(element);
+									if (response.code == 1) {
+										this.filesClient = OC.Files.getClient();
+										close();
+										context.fileList.reload();
+									} else {
+										context.fileList.showFileBusyState(tr, false);
+										close();
+										OC.dialogs.alert(
+											t('video_converter', response.desc),
+											t('video_converter', 'Error converting ' + filename)
+										);
+									}
+								}
+							});
+						});
                     });
                 }
             });
